@@ -160,15 +160,19 @@ export function Navbar() {
                             </Link>
                         </nav>
 
-                        <div className="mt-auto pt-12">
+                        <div className="mt-auto pt-12 pb-6">
                             <p className="text-brand-text-muted uppercase text-xs tracking-wider mb-4">Get in Touch</p>
-                            <a href="tel:905-906-0045" className="flex items-center gap-3 text-brand-text mb-6">
+                            <a
+                                href="tel:905-906-0045"
+                                className="flex items-center justify-center gap-2 w-full border border-brand-border bg-white text-brand-text px-6 py-4 rounded-sm font-medium transition-colors mb-3 shadow-sm"
+                                onClick={() => setMobileMenuOpen(false)}
+                            >
                                 <Phone className="w-5 h-5 text-brand-accent" />
-                                <span className="font-medium text-xl">(905) 906-0045</span>
+                                <span>Call or Text Me</span>
                             </a>
                             <Link
                                 href="/contact"
-                                className="block text-center w-full bg-brand-accent hover:bg-brand-accent-light text-white px-6 py-4 rounded-sm font-medium transition-colors"
+                                className="block text-center w-full bg-brand-accent hover:bg-brand-accent-light text-white px-6 py-4 rounded-sm font-medium transition-colors shadow-sm"
                                 onClick={() => setMobileMenuOpen(false)}
                             >
                                 Let's Talk

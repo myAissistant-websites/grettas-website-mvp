@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
+import { ChevronDown } from 'lucide-react'
 import { TestimonialsSection } from '@/components/home/TestimonialsSection'
 
 export const metadata: Metadata = {
@@ -13,7 +14,7 @@ export default function AboutPage() {
         <div className="bg-brand-bg min-h-screen pt-20">
 
             {/* Hero */}
-            <section className="relative h-[60vh] min-h-[500px] flex items-center justify-center">
+            <section className="relative h-[60vh] min-h-[500px] flex flex-col items-center justify-center">
                 <Image
                     src="/images/abdul-photo-no-bg-v2.png"
                     alt="Abdul Basharmal"
@@ -23,8 +24,13 @@ export default function AboutPage() {
                     className="object-contain object-bottom"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-brand-bg-dark/80 via-brand-bg-dark/40 to-transparent"></div>
-                <div className="relative z-10 text-center px-4">
-                    <h1 className="font-display text-5xl md:text-7xl text-white mb-4">Hi, I'm <span className="italic text-brand-gold">Abdul.</span></h1>
+
+                <div className="relative z-10 text-center px-4 flex-1 flex items-center justify-center w-full mt-20">
+                    <h1 className="font-display text-5xl md:text-7xl text-white">Hi, I'm <span className="italic text-brand-gold">Abdul.</span></h1>
+                </div>
+
+                <div className="relative z-20 pb-8 mt-auto flex justify-center w-full">
+                    <ChevronDown className="w-8 h-8 text-white animate-bounce" />
                 </div>
             </section>
 

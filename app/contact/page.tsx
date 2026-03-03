@@ -23,7 +23,7 @@ export default async function ContactPage({
                 <div className="bg-white border border-brand-border/40 shadow-xl overflow-hidden rounded-sm flex flex-col lg:flex-row">
 
                     {/* Left Column (Info) */}
-                    <div className="w-full lg:w-5/12 bg-brand-bg-dark text-white p-8 md:p-12 lg:p-16 flex flex-col relative z-0">
+                    <div className="w-full lg:w-5/12 bg-brand-bg-dark text-white p-8 md:p-12 lg:p-16 flex flex-col relative z-0 order-2 lg:order-1">
                         {/* Subtle background pattern/gradient */}
                         <div className="absolute inset-0 bg-gradient-to-br from-brand-accent/20 to-transparent opacity-30 z-[-1]"></div>
 
@@ -104,10 +104,10 @@ export default async function ContactPage({
                     </div>
 
                     {/* Right Column (Form) */}
-                    <div className="w-full lg:w-7/12 p-8 md:p-12 xl:p-16 bg-white flex flex-col justify-center">
+                    <div className="w-full lg:w-7/12 p-8 md:p-12 xl:p-16 bg-white flex flex-col justify-center order-1 lg:order-2">
 
                         <div className="mb-10 border-b border-brand-border/40 pb-6 flex items-center gap-6">
-                            <div className="w-16 h-16 rounded-full overflow-hidden border border-brand-border/50 shrink-0 md:hidden lg:block xl:hidden">
+                            <div className="relative w-16 h-16 rounded-full overflow-hidden border border-brand-border/50 shrink-0 md:hidden lg:block xl:hidden">
                                 <Image
                                     src="https://cdn.realtor.ca/individual/TS637750507800000000/highres/1403257.jpg"
                                     alt="Abdul Basharmal"
