@@ -94,7 +94,6 @@ function buildODataFilter(filters: ListingFilters): string {
     if (filters.beds) parts.push(`BedroomsTotal ge ${filters.beds}`)
     if (filters.baths) parts.push(`BathroomsTotalInteger ge ${filters.baths}`)
     if (filters.city) parts.push(`City eq '${filters.city}'`)
-    if (filters.propertyType) parts.push(`PropertyType eq '${filters.propertyType}'`)
 
     return parts.join(' and ')
 }
@@ -122,7 +121,6 @@ export async function getListings(filters: ListingFilters = {}): Promise<Listing
     const filter = buildODataFilter(filters)
     if (filter) params.set('$filter', filter)
     params.set('$orderby', buildODataOrderBy(filters))
-    params.set('$expand', 'Media')
 
     const res = await fetch(`${DDF_API_BASE}/Property?${params.toString()}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -150,7 +148,6 @@ export async function getListing(listingId: string): Promise<Listing> {
 
     const token = await getDdfToken()
     const params = new URLSearchParams()
-    params.set('$expand', 'Media')
     params.set('$filter', `ListingKey eq '${listingId}'`)
 
     const res = await fetch(`${DDF_API_BASE}/Property?${params.toString()}`, {
@@ -173,8 +170,25 @@ export async function getFeaturedListings(limit = 6): Promise<Listing[]> {
         return mockListings.slice(0, limit)
     }
 
-    // Get most recent active listings as "featured"
-    return getListings({ limit, sortField: 'listingDate', sortDirection: 'desc' })
+    // Get most recent active residential listings in Abdul's service area
+    const token = await getDdfToken()
+    const params = new URLSearchParams()
+    params.set('$top', limit.toString())
+    params.set('$filter', "(City eq 'Kitchener' or City eq 'Waterloo' or City eq 'Cambridge') and ListPrice gt 200000")
+    params.set('$orderby', 'ModificationTimestamp desc')
+
+    const res = await fetch(`${DDF_API_BASE}/Property?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${token}` },
+        next: { revalidate: 300 },
+    })
+
+    if (!res.ok) {
+        console.error('DDF featured error:', res.status)
+        return []
+    }
+
+    const data = await res.json()
+    return (data.value || []).map(normalizeDdfListing)
 }
 
 // ─── Normalize DDF RESO response to our Listing type ─────────────────────
@@ -191,11 +205,11 @@ function normalizeDdfListing(raw: any): Listing {
     const unitPart = unit ? ` Unit ${unit}` : ''
     const fullAddress = `${streetNum} ${streetName} ${streetSuffix}${unitPart}, ${city}, ${province} ${postal}`.trim()
 
-    // Media array from DDF
+    // Media array from DDF (inline, not expanded)
     const photos = (raw.Media || [])
-        .filter((m: any) => m.MediaCategory === 'Photo' || m.MediaType?.startsWith('image'))
         .sort((a: any, b: any) => (a.Order || 0) - (b.Order || 0))
         .map((m: any) => m.MediaURL)
+        .filter(Boolean)
 
     // Calculate days on market
     const listDate = raw.ListingContractDate || raw.OriginalEntryTimestamp || ''
@@ -232,7 +246,7 @@ function normalizeDdfListing(raw: any): Listing {
             cooling: raw.Cooling ? (Array.isArray(raw.Cooling) ? raw.Cooling.join(', ') : raw.Cooling) : undefined,
             basement: raw.Basement ? (Array.isArray(raw.Basement) ? raw.Basement.join(', ') : raw.Basement) : undefined,
         },
-        realtorCaUrl: `https://www.realtor.ca/real-estate/${raw.ListingKey}`,
+        realtorCaUrl: raw.ListingURL ? `https://${raw.ListingURL}` : `https://www.realtor.ca/real-estate/${raw.ListingKey}`,
         listingBrokerage: raw.ListOfficeName || '',
     }
 }
