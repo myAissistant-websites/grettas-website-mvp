@@ -722,6 +722,7 @@ export async function getAllMapPins(filters: ListingFilters = {}): Promise<{ pin
     const firstParams = new URLSearchParams()
     firstParams.set('$top', DDF_PAGE_LIMIT.toString())
     firstParams.set('$count', 'true')
+    firstParams.set('$select', MAP_PIN_SELECT)
     if (filterStr) firstParams.set('$filter', filterStr)
     firstParams.set('$orderby', orderBy)
 
