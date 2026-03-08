@@ -70,7 +70,6 @@ export function MapView({ filterParams, totalCount }: MapViewProps) {
 
     // Fetch ALL pins once on mount (no filters) — subsequent filter changes are instant
     useEffect(() => {
-        if (!isDesktop) { setAllPins([]); return }
         let cancelled = false
         setAllPins(null)
 
@@ -84,7 +83,7 @@ export function MapView({ filterParams, totalCount }: MapViewProps) {
             })
 
         return () => { cancelled = true }
-    }, [isDesktop]) // only re-fetch if desktop state changes, NOT on filter change
+    }, []) // fetch once on mount
 
     // Apply filters client-side — instant, no network call
     const filteredPins = useMemo(() => {
@@ -106,13 +105,15 @@ export function MapView({ filterParams, totalCount }: MapViewProps) {
     }, [])
 
     // Filter pins to visible bounds client-side
+    // On mobile (no map), skip bounds filtering and show all filtered pins
     const visiblePins = useMemo(() => {
-        if (!filteredPins || !bounds) return filteredPins || []
+        if (!filteredPins) return []
+        if (!isDesktop || !bounds) return filteredPins
         return filteredPins.filter(p =>
             p.lat >= bounds.south && p.lat <= bounds.north &&
             p.lng >= bounds.west && p.lng <= bounds.east
         )
-    }, [filteredPins, bounds])
+    }, [filteredPins, bounds, isDesktop])
 
     const totalPages = Math.max(1, Math.ceil(visiblePins.length / PER_PAGE))
     const sidebarPins = useMemo(
