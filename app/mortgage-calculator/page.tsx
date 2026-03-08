@@ -1,5 +1,7 @@
 import { Metadata } from 'next'
-import { MortgageCalculator } from '@/components/MortgageCalculator'
+import dynamic from 'next/dynamic'
+
+const MortgageCalculator = dynamic(() => import('@/components/MortgageCalculator').then(m => m.MortgageCalculator), { ssr: false })
 import { AnimatedSection } from '@/components/ui/AnimatedSection'
 import { SectionLabel } from '@/components/ui/SectionLabel'
 import Link from 'next/link'
