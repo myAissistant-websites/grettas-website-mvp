@@ -4,7 +4,9 @@ import { ListingSearch } from './_components/ListingSearch'
 import { ListingCard } from './_components/ListingCard'
 import { ListingDisclaimer } from './_components/ListingDisclaimer'
 import { Pagination } from './_components/Pagination'
-import { MapView } from './_components/MapView'
+import dynamic from 'next/dynamic'
+
+const MapView = dynamic(() => import('./_components/MapView').then(m => m.MapView), { ssr: false })
 import { ListingsTermsGate } from './_components/ListingsTermsGate'
 
 export const metadata: Metadata = {
