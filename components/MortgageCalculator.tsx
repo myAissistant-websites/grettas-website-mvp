@@ -43,12 +43,14 @@ export function MortgageCalculator() {
 
     useEffect(() => {
         const principal = price - dp
-        if (principal <= 0) { setPayment(0); return }
+        if (principal <= 0 || price > 100_000_000) { setPayment(0); return }
 
         const cmhc = needsInsurance ? principal * getCmhcRate(dpPercent) : 0
         const mortgage = principal + cmhc
 
-        const annualRate = (parseFloat(rate) || 0) / 100
+        const parsedRate = parseFloat(rate) || 0
+        if (parsedRate <= 0 || parsedRate > 25) { setPayment(0); return }
+        const annualRate = parsedRate / 100
         const semiAnnual = annualRate / 2
         const effectiveAnnual = Math.pow(1 + semiAnnual, 2) - 1
         const periods = getPeriodsPerYear(freq)
