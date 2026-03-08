@@ -5,7 +5,8 @@ import { Bed, Bath, Maximize } from 'lucide-react'
 import type { Listing } from '@/lib/listings'
 
 export const ListingCard = React.memo(function ListingCard({ listing }: { listing: Listing }) {
-    const isNew = (Date.now() - new Date(listing.listDate).getTime()) / (1000 * 3600 * 24) <= 7
+    const listTime = listing.listDate ? new Date(listing.listDate).getTime() : NaN
+    const isNew = !isNaN(listTime) && (Date.now() - listTime) / (1000 * 3600 * 24) <= 7
 
     return (
         <Link href={`/listings/${listing.id}`} className="group block">
