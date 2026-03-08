@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import { ChevronLeft, ChevronRight, X, ImageIcon } from 'lucide-react'
 
-export function ImageGallery({ photos }: { photos: string[] }) {
+export function ImageGallery({ photos, address }: { photos: string[], address?: string }) {
     const [currentIndex, setCurrentIndex] = useState(0)
     const [isFullscreen, setIsFullscreen] = useState(false)
 
@@ -37,7 +37,7 @@ export function ImageGallery({ photos }: { photos: string[] }) {
                 >
                     <Image
                         src={photos[0]}
-                        alt="Property Photo 1"
+                        alt={address ? `${address} - Photo 1` : 'Property photo 1'}
                         fill
                         className="object-cover group-hover:brightness-95 transition-all duration-200"
                         sizes="(max-width: 768px) 100vw, 66vw"
@@ -54,7 +54,7 @@ export function ImageGallery({ photos }: { photos: string[] }) {
                         >
                             <Image
                                 src={photos[1]}
-                                alt="Property Photo 2"
+                                alt={address ? `${address} - Photo 2` : 'Property photo 2'}
                                 fill
                                 className="object-cover group-hover:brightness-95 transition-all duration-200"
                                 sizes="33vw"
@@ -70,7 +70,7 @@ export function ImageGallery({ photos }: { photos: string[] }) {
                         >
                             <Image
                                 src={photos[2]}
-                                alt="Property Photo 3"
+                                alt={address ? `${address} - Photo 3` : 'Property photo 3'}
                                 fill
                                 className="object-cover group-hover:brightness-95 transition-all duration-200"
                                 sizes="33vw"
@@ -107,7 +107,7 @@ export function ImageGallery({ photos }: { photos: string[] }) {
                     <div className="relative w-full h-[80vh] flex items-center justify-center">
                         <Image
                             src={photos[currentIndex]}
-                            alt={`Property Photo ${currentIndex + 1}`}
+                            alt={address ? `${address} - Photo ${currentIndex + 1}` : `Property photo ${currentIndex + 1}`}
                             fill
                             className="object-contain"
                             sizes="100vw"
@@ -141,7 +141,7 @@ export function ImageGallery({ photos }: { photos: string[] }) {
                             >
                                 <Image
                                     src={photo}
-                                    alt={`Thumbnail ${index + 1}`}
+                                    alt={address ? `${address} - Thumbnail ${index + 1}` : `Thumbnail ${index + 1}`}
                                     fill
                                     className="object-cover"
                                     sizes="64px"

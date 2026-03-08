@@ -72,7 +72,7 @@ export default async function ListingDetailPage({
                 </div>
 
                 {/* Photo Grid */}
-                <ImageGallery photos={listing.photos} />
+                <ImageGallery photos={listing.photos} address={listing.address.full} />
 
                 {/* Quick Stats Bar — right below photos */}
                 <div className="flex flex-wrap items-center gap-x-8 gap-y-3 py-5 border-b border-gray-200">
