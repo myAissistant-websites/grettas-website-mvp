@@ -79,7 +79,8 @@ function addMapImages(map: any) {
         const w = 28, h = 38
         const canvas = document.createElement('canvas')
         canvas.width = w * ratio; canvas.height = h * ratio
-        const ctx = canvas.getContext('2d')!
+        const ctx = canvas.getContext('2d')
+        if (!ctx) return
         ctx.scale(ratio, ratio)
         drawPinMarker(ctx, w, h, ACCENT)
         ctx.beginPath(); ctx.arc(w / 2, w / 2, 4, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.fill()
@@ -91,7 +92,8 @@ function addMapImages(map: any) {
         const w = 36, h = 46
         const canvas = document.createElement('canvas')
         canvas.width = w * ratio; canvas.height = h * ratio
-        const ctx = canvas.getContext('2d')!
+        const ctx = canvas.getContext('2d')
+        if (!ctx) return
         ctx.scale(ratio, ratio)
         drawPinMarker(ctx, w, h, ACCENT)
         map.addImage('pin-cluster', { width: canvas.width, height: canvas.height, data: ctx.getImageData(0, 0, canvas.width, canvas.height).data }, { pixelRatio: ratio })
