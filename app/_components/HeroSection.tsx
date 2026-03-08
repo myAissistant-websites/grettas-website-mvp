@@ -37,7 +37,7 @@ export function HeroSection() {
                             {/* Mobile Image (Right) */}
                             <div className="w-[40%] relative lg:hidden h-[40vh] min-h-[250px] self-end z-0">
                                 <Image
-                                    src="/images/abdul-photo-no-bg-v2.png"
+                                    src="/images/abdul-photo-no-bg-v2.webp"
                                     alt="Abdul Basharmal - Waterloo Region REALTOR"
                                     fill
                                     priority
@@ -76,7 +76,7 @@ export function HeroSection() {
                     {/* Desktop Image */}
                     <div className="hidden lg:block w-5/12 relative h-full min-h-[600px] 2xl:min-h-[700px] z-0">
                         <Image
-                            src="/images/abdul-photo-no-bg-v2.png"
+                            src="/images/abdul-photo-no-bg-v2.webp"
                             alt="Abdul Basharmal - Waterloo Region REALTOR"
                             fill
                             priority

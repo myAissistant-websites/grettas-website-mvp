@@ -66,7 +66,7 @@ export const mockListings: Listing[] = [
         beds: 4, baths: 3, sqft: 2100, lotSize: '40 x 110 ft',
         propertyType: 'Detached', yearBuilt: 2005,
         description: 'Beautiful family home in sought-after Williamsburg neighbourhood.',
-        photos: ['/images/house-1.jpg'],
+        photos: ['/images/house-1.webp'],
         listDate: new Date(Date.now() - 3 * 86400000).toISOString(), daysOnMarket: 3, status: 'Active', virtualTour: null,
         listingBrokerage: 'RE/MAX Twin City Realty Inc.',
         realtorCaUrl: '#',

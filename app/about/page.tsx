@@ -16,7 +16,7 @@ export default function AboutPage() {
             {/* Hero */}
             <section className="relative h-[60vh] min-h-[500px] flex flex-col items-center justify-center">
                 <Image
-                    src="/images/abdul-photo-no-bg-v2.png"
+                    src="/images/abdul-photo-no-bg-v2.webp"
                     alt="Abdul Basharmal"
                     fill
                     priority

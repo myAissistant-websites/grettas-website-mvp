@@ -15,7 +15,7 @@ export const ListingCard = React.memo(function ListingCard({ listing }: { listin
                 {/* Image */}
                 <div className="relative aspect-[16/10] w-full overflow-hidden bg-gray-100">
                     <Image
-                        src={listing.photos[0] || '/images/listing-placeholder.jpg'}
+                        src={listing.photos[0] || '/images/listing-placeholder.webp'}
                         alt={listing.address.full}
                         fill
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
