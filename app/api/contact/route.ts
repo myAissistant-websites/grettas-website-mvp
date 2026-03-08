@@ -1,7 +1,22 @@
 import { Resend } from 'resend'
 import { z } from 'zod'
+import { headers } from 'next/headers'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
+
+// Simple in-memory rate limiter: max 5 submissions per IP per 15 minutes
+const RATE_LIMIT_MAX = 5
+const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000
+const ipHits = new Map<string, number[]>()
+
+function isRateLimited(ip: string): boolean {
+    const now = Date.now()
+    const hits = (ipHits.get(ip) || []).filter(t => now - t < RATE_LIMIT_WINDOW_MS)
+    if (hits.length >= RATE_LIMIT_MAX) return true
+    hits.push(now)
+    ipHits.set(ip, hits)
+    return false
+}
 
 const contactSchema = z.object({
     firstName: z.string().min(1).max(100),
@@ -25,6 +40,16 @@ function escapeHtml(str: string): string {
 
 export async function POST(request: Request) {
     try {
+        const headersList = await headers()
+        const ip = headersList.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
+
+        if (isRateLimited(ip)) {
+            return Response.json(
+                { success: false, error: 'Too many requests. Please try again later.' },
+                { status: 429 }
+            )
+        }
+
         const body = await request.json()
         const result = contactSchema.safeParse(body)
 
