@@ -1,6 +1,6 @@
 import { Resend } from 'resend'
-import { z } from 'zod'
 import { headers } from 'next/headers'
+import { contactSchema, escapeHtml } from '@/lib/contact-utils'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -16,26 +16,6 @@ function isRateLimited(ip: string): boolean {
     hits.push(now)
     ipHits.set(ip, hits)
     return false
-}
-
-const contactSchema = z.object({
-    firstName: z.string().min(1).max(100),
-    lastName: z.string().min(1).max(100),
-    email: z.string().email().max(320),
-    phone: z.string().max(30).optional(),
-    message: z.string().min(10).max(5000),
-    intent: z.enum(['Buy', 'Sell', 'Both', 'Just Curious']).optional(),
-    language: z.enum(['English', 'Farsi', 'Dari', 'Persian', 'Hindi', 'Urdu']).optional(),
-    listingAddress: z.string().max(500).optional(),
-})
-
-function escapeHtml(str: string): string {
-    return str
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;')
 }
 
 export async function POST(request: Request) {

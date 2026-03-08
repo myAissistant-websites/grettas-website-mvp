@@ -2,22 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { calculatePayment } from '@/lib/mortgage'
 
 const frequencies = ['Monthly', 'Semi-monthly', 'Bi-weekly', 'Weekly'] as const
-
-function getCmhcRate(pct: number) {
-    if (pct >= 20) return 0
-    if (pct >= 15) return 0.028
-    if (pct >= 10) return 0.031
-    return 0.04
-}
-
-function getPeriodsPerYear(freq: string) {
-    if (freq === 'Semi-monthly') return 24
-    if (freq === 'Bi-weekly') return 26
-    if (freq === 'Weekly') return 52
-    return 12
-}
 
 function formatInput(val: string) {
     const num = parseInt(val.replace(/[^0-9]/g, '')) || 0
@@ -42,25 +29,15 @@ export function MortgageCalculator() {
     const needsInsurance = dpPercent < 20 && price < 1500000 && price > 0
 
     useEffect(() => {
-        const principal = price - dp
-        if (principal <= 0 || price > 100_000_000) { setPayment(0); return }
-
-        const cmhc = needsInsurance ? principal * getCmhcRate(dpPercent) : 0
-        const mortgage = principal + cmhc
-
         const parsedRate = parseFloat(rate) || 0
-        if (parsedRate <= 0 || parsedRate > 25) { setPayment(0); return }
-        const annualRate = parsedRate / 100
-        const semiAnnual = annualRate / 2
-        const effectiveAnnual = Math.pow(1 + semiAnnual, 2) - 1
-        const periods = getPeriodsPerYear(freq)
-        const periodRate = Math.pow(1 + effectiveAnnual, 1 / periods) - 1
-        const totalPeriods = amort * periods
-
-        if (periodRate === 0) { setPayment(mortgage / totalPeriods); return }
-
-        setPayment((mortgage * periodRate) / (1 - Math.pow(1 + periodRate, -totalPeriods)))
-    }, [price, dp, dpPercent, rate, amort, freq, needsInsurance])
+        setPayment(calculatePayment({
+            price,
+            downPayment: dp,
+            rate: parsedRate,
+            amortizationYears: amort,
+            frequency: freq,
+        }))
+    }, [price, dp, rate, amort, freq])
 
     const formatCurrency = (n: number) =>
         new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 2 }).format(n)
