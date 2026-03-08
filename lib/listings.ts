@@ -238,7 +238,7 @@ function buildODataOrderBy(filters: ListingFilters): string {
  */
 export async function getListings(filters: ListingFilters = {}): Promise<{ listings: Listing[], totalCount: number }> {
     if (!DDF_CLIENT_ID) {
-        console.warn('⚠️  No DDF_CLIENT_ID set - returning mock listings')
+        // DDF credentials not configured — fall back to mock data
         const { mockListings } = await import('./mock-listings')
         const filtered = applyMockFilters(mockListings, filters)
         return { listings: filtered, totalCount: mockListings.length }
@@ -303,7 +303,7 @@ const DDF_PAGE_LIMIT = 100
  */
 export async function getAllListings(filters: ListingFilters = {}): Promise<{ listings: Listing[], totalCount: number }> {
     if (!DDF_CLIENT_ID) {
-        console.warn('⚠️  No DDF_CLIENT_ID set - returning mock listings')
+        // DDF credentials not configured — fall back to mock data
         const { mockListings } = await import('./mock-listings')
         const filtered = applyMockFilters(mockListings, filters)
         return { listings: filtered, totalCount: mockListings.length }
