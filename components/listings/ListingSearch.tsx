@@ -211,14 +211,14 @@ export function ListingSearch({ initialFilters = {}, resultCount, totalCount }: 
                 {/* Desktop: full filter row */}
                 <div className="hidden sm:flex flex-wrap items-end gap-3 p-4">
                     {/* Transaction Type */}
-                    <FilterSelect label="Transaction Type" value={currentVal('tt')} onChange={(v) => handleChange('tt', v)} className="min-w-[130px]">
+                    <FilterSelect label="Transaction Type" value={currentVal('tt')} onChange={(v) => handleChange('tt', v)} className="min-w-[110px]">
                         <option value="">All</option>
                         <option value="sale">For Sale</option>
                         <option value="rent">For Rent</option>
                     </FilterSelect>
 
                     {/* Property Type */}
-                    <FilterSelect label="Property Type" value={currentVal('pt')} onChange={(v) => handleChange('pt', v)} className="min-w-[150px] flex-1">
+                    <FilterSelect label="Property Type" value={currentVal('pt')} onChange={(v) => handleChange('pt', v)} className="min-w-[120px]">
                         <option value="">Any</option>
                         <option value="House">House</option>
                         <option value="Apartment">Apartment</option>
@@ -229,13 +229,13 @@ export function ListingSearch({ initialFilters = {}, resultCount, totalCount }: 
                     </FilterSelect>
 
                     {/* Min Price */}
-                    <PriceInput label="Min Price" value={currentVal('lp')} onChange={(v) => handleChange('lp', v)} presets={minPresets} placeholder="No min" className="min-w-[130px] flex-1" />
+                    <PriceInput label="Min Price" value={currentVal('lp')} onChange={(v) => handleChange('lp', v)} presets={minPresets} placeholder="No min" className="min-w-[110px] flex-1" />
 
                     {/* Max Price */}
-                    <PriceInput label="Max Price" value={currentVal('hp')} onChange={(v) => handleChange('hp', v)} presets={maxPresets} placeholder="No max" className="min-w-[130px] flex-1" />
+                    <PriceInput label="Max Price" value={currentVal('hp')} onChange={(v) => handleChange('hp', v)} presets={maxPresets} placeholder="No max" className="min-w-[110px] flex-1" />
 
                     {/* Beds */}
-                    <FilterSelect label="Beds" value={currentVal('bd')} onChange={(v) => handleChange('bd', v)} className="min-w-[100px]">
+                    <FilterSelect label="Beds" value={currentVal('bd')} onChange={(v) => handleChange('bd', v)} className="min-w-[80px]">
                         <option value="">Any</option>
                         <option value="1">1+</option>
                         <option value="2">2+</option>
@@ -245,7 +245,7 @@ export function ListingSearch({ initialFilters = {}, resultCount, totalCount }: 
                     </FilterSelect>
 
                     {/* Baths */}
-                    <FilterSelect label="Baths" value={currentVal('ba')} onChange={(v) => handleChange('ba', v)} className="min-w-[100px]">
+                    <FilterSelect label="Baths" value={currentVal('ba')} onChange={(v) => handleChange('ba', v)} className="min-w-[80px]">
                         <option value="">Any</option>
                         <option value="1">1+</option>
                         <option value="2">2+</option>
@@ -264,37 +264,36 @@ export function ListingSearch({ initialFilters = {}, resultCount, totalCount }: 
                             <span className="w-2 h-2 rounded-full bg-brand-accent" />
                         )}
                     </button>
-                </div>
 
-                {/* Results count + Sort row */}
-                <div className="flex items-center justify-between px-2.5 sm:px-4 pb-2.5 sm:pb-3 pt-1 border-t border-gray-100">
-                    <div className="text-xs sm:text-sm text-gray-500">
-                        {totalCount !== undefined ? (
-                            <span>Results: <strong className="text-gray-900">{totalCount.toLocaleString()} Listings</strong></span>
-                        ) : resultCount !== undefined ? (
-                            <span>Results: <strong className="text-gray-900">{resultCount} Listings</strong></span>
-                        ) : null}
+                    {/* Spacer */}
+                    <div className="flex-1" />
+
+                    {/* Map / List toggle */}
+                    <div className="hidden lg:flex border border-gray-300 rounded overflow-hidden self-end">
+                        <button
+                            onClick={() => handleChange('view', 'list')}
+                            className={`flex items-center gap-1 px-3 py-2 text-xs font-medium transition-colors ${currentView === 'list' ? 'bg-brand-accent text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+                        >
+                            <List className="w-3.5 h-3.5" /> List
+                        </button>
+                        <button
+                            onClick={() => handleChange('view', 'map')}
+                            className={`flex items-center gap-1 px-3 py-2 text-xs font-medium transition-colors ${currentView === 'map' ? 'bg-brand-accent text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+                        >
+                            <MapIcon className="w-3.5 h-3.5" /> Map
+                        </button>
                     </div>
-                    <div className="flex items-center gap-3">
-                        {/* Map / List toggle */}
-                        <div className="hidden lg:flex border border-gray-300 rounded overflow-hidden">
-                            <button
-                                onClick={() => handleChange('view', 'list')}
-                                className={`flex items-center gap-1 px-3 py-1.5 text-xs font-medium transition-colors ${currentView === 'list' ? 'bg-brand-accent text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
-                            >
-                                <List className="w-3.5 h-3.5" /> List
-                            </button>
-                            <button
-                                onClick={() => handleChange('view', 'map')}
-                                className={`flex items-center gap-1 px-3 py-1.5 text-xs font-medium transition-colors ${currentView === 'map' ? 'bg-brand-accent text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
-                            >
-                                <MapIcon className="w-3.5 h-3.5" /> Map
-                            </button>
-                        </div>
-                        <span className="text-xs font-medium text-gray-500">Sort By</span>
+
+                    {/* Sort By */}
+                    <div className="self-end">
+                        <label className="block text-xs font-medium text-gray-600 mb-1.5">Sort By</label>
                         <div className="relative">
                             <select
-                                value={currentVal('sortField') || 'listingDate'}
+                                value={
+                                    currentVal('sortField') === 'listingPrice'
+                                        ? currentVal('sortDirection') === 'asc' ? 'price-asc' : 'price-desc'
+                                        : 'listingDate'
+                                }
                                 onChange={(e) => {
                                     const val = e.target.value
                                     const params = new URLSearchParams(searchParams.toString())
@@ -310,13 +309,13 @@ export function ListingSearch({ initialFilters = {}, resultCount, totalCount }: 
                                     }
                                     router.push(pathname + '?' + params.toString())
                                 }}
-                                className="border border-gray-300 rounded px-3 py-1.5 bg-white text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-accent/30 pr-8 appearance-none"
+                                className={selectClass + ' min-w-[120px]'}
                             >
                                 <option value="listingDate">Newest</option>
-                                <option value="price-asc">Price: Low to High</option>
-                                <option value="price-desc">Price: High to Low</option>
+                                <option value="price-asc">Price: Low → High</option>
+                                <option value="price-desc">Price: High → Low</option>
                             </select>
-                            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                         </div>
                     </div>
                 </div>
