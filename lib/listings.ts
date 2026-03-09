@@ -227,7 +227,7 @@ export function buildODataFilter(filters: ListingFilters): string {
         parts.push(`City eq '${odataString(filters.city)}'`)
     } else {
         // Default to Abdul's service area
-        const cityFilter = SERVICE_AREA_CITIES.map(c => `City eq '${c}'`).join(' or ')
+        const cityFilter = SERVICE_AREA_CITIES.map(c => `City eq '${odataString(c)}'`).join(' or ')
         parts.push(`(${cityFilter})`)
     }
 
@@ -832,20 +832,39 @@ export async function getListingCount(filters: ListingFilters = {}): Promise<num
 
 // ─── Parse filter params from URL search params ─────────────────────────
 
+const VALID_PROPERTY_TYPES = new Set([
+    'House', 'Apartment', 'Row / Townhouse', 'Duplex', 'Triplex',
+    'Fourplex', 'Mobile Home', 'Manufactured Home/Mobile', 'Land',
+])
+
+const VALID_BUILDING_TYPES = new Set([
+    'Single Family', 'Multi-family', 'Vacant Land', 'Commercial',
+])
+
+const VALID_TRANSACTION_TYPES = new Set(['sale', 'rent'])
+const VALID_SORT_FIELDS = new Set(['listingPrice', 'listingDate'])
+const VALID_SORT_DIRECTIONS = new Set(['asc', 'desc'])
+
 export function parseFilterParams(params: Record<string, string>): ListingFilters {
     return {
         minPrice: params.lp ? Number(params.lp) : undefined,
         maxPrice: params.hp ? Number(params.hp) : undefined,
         beds: params.bd ? Number(params.bd) : undefined,
         baths: params.ba ? Number(params.ba) : undefined,
-        propertyType: params.pt || undefined,
-        buildingType: params.bt || undefined,
+        propertyType: params.pt && VALID_PROPERTY_TYPES.has(params.pt) ? params.pt : undefined,
+        buildingType: params.bt && VALID_BUILDING_TYPES.has(params.bt) ? params.bt : undefined,
         city: params.city || undefined,
-        transactionType: (params.tt as 'sale' | 'rent') || undefined,
+        transactionType: params.tt && VALID_TRANSACTION_TYPES.has(params.tt)
+            ? (params.tt as 'sale' | 'rent')
+            : undefined,
         storeys: params.storeys ? Number(params.storeys) : undefined,
         yearBuilt: params.yb ? Number(params.yb) : undefined,
-        sortField: (params.sortField as 'listingPrice' | 'listingDate') || undefined,
-        sortDirection: (params.sortDirection as 'asc' | 'desc') || undefined,
+        sortField: params.sortField && VALID_SORT_FIELDS.has(params.sortField)
+            ? (params.sortField as 'listingPrice' | 'listingDate')
+            : undefined,
+        sortDirection: params.sortDirection && VALID_SORT_DIRECTIONS.has(params.sortDirection)
+            ? (params.sortDirection as 'asc' | 'desc')
+            : undefined,
     }
 }
 

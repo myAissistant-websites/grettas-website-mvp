@@ -1,5 +1,3 @@
-import Image from 'next/image'
-
 export function ListingDisclaimer({ lastUpdated }: { lastUpdated?: string }) {
     return (
         <div className="mt-8 border-t border-brand-border/30 pt-8 text-center">
@@ -9,7 +7,8 @@ export function ListingDisclaimer({ lastUpdated }: { lastUpdated?: string }) {
                 rel="noopener noreferrer"
                 className="inline-block mb-4"
             >
-                <Image
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                     src="https://www.realtor.ca/images/logo.svg"
                     alt="Powered by REALTOR.ca"
                     width={120}

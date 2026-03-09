@@ -106,6 +106,31 @@ describe('parseFilterParams', () => {
         expect(result.sortField).toBe('listingPrice')
         expect(result.sortDirection).toBe('asc')
     })
+
+    it('rejects invalid property type', () => {
+        const result = parseFilterParams({ pt: "House') or 1 eq 1 or ('x" })
+        expect(result.propertyType).toBeUndefined()
+    })
+
+    it('rejects invalid building type', () => {
+        const result = parseFilterParams({ bt: 'MaliciousValue' })
+        expect(result.buildingType).toBeUndefined()
+    })
+
+    it('rejects invalid transaction type', () => {
+        const result = parseFilterParams({ tt: 'steal' })
+        expect(result.transactionType).toBeUndefined()
+    })
+
+    it('rejects invalid sort field', () => {
+        const result = parseFilterParams({ sortField: 'DROP TABLE' })
+        expect(result.sortField).toBeUndefined()
+    })
+
+    it('rejects invalid sort direction', () => {
+        const result = parseFilterParams({ sortDirection: 'sideways' })
+        expect(result.sortDirection).toBeUndefined()
+    })
 })
 
 // ─── buildODataFilter ───────────────────────────────────────────────────

@@ -41,6 +41,8 @@ export function MapView({ filterParams }: MapViewProps) {
             setAllPins([])
 
             let cursor: number | null = 0
+            const accumulated: MapPin[] = []
+            let isFirstChunk = true
 
             while (cursor !== null && !cancelled) {
                 try {
@@ -50,10 +52,15 @@ export function MapView({ filterParams }: MapViewProps) {
 
                     if (cancelled) break
 
-                    setAllPins(prev => [...prev, ...data.pins])
+                    accumulated.push(...data.pins)
 
-                    // After first chunk, switch from loading to loading-more
-                    setIsLoading(false)
+                    // Show first chunk immediately so the UI isn't blank
+                    if (isFirstChunk) {
+                        setAllPins([...accumulated])
+                        setIsLoading(false)
+                        isFirstChunk = false
+                    }
+
                     if (data.nextCursor !== null) {
                         setIsLoadingMore(true)
                     }
@@ -69,6 +76,8 @@ export function MapView({ filterParams }: MapViewProps) {
             }
 
             if (!cancelled) {
+                // Single state update with all accumulated pins
+                setAllPins([...accumulated])
                 setIsLoadingMore(false)
             }
         }

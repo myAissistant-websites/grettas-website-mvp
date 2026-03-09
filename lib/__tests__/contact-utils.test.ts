@@ -98,4 +98,20 @@ describe('contactSchema', () => {
         const result = contactSchema.safeParse({ ...validData, firstName: 'a'.repeat(101) })
         expect(result.success).toBe(false)
     })
+
+    it('accepts valid phone numbers', () => {
+        const validPhones = ['519-555-0123', '+1 (519) 555-0123', '5195550123', '+1.519.555.0123']
+        for (const phone of validPhones) {
+            const result = contactSchema.safeParse({ ...validData, phone })
+            expect(result.success).toBe(true)
+        }
+    })
+
+    it('rejects phone with non-phone characters', () => {
+        const invalidPhones = ['<script>alert(1)</script>', 'abc123', 'call me!']
+        for (const phone of invalidPhones) {
+            const result = contactSchema.safeParse({ ...validData, phone })
+            expect(result.success).toBe(false)
+        }
+    })
 })

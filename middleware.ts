@@ -4,12 +4,15 @@ import type { NextRequest } from 'next/server'
 export function middleware(request: NextRequest) {
     const response = NextResponse.next()
 
+    // Generate a per-request nonce for inline scripts
+    const nonce = Buffer.from(crypto.randomUUID()).toString('base64')
+
     const csp = [
         "default-src 'self'",
-        "script-src 'self' 'unsafe-inline' https://api.mapbox.com https://cdn.mapbox.com",
+        `script-src 'self' 'nonce-${nonce}' https://api.mapbox.com https://cdn.mapbox.com`,
         "style-src 'self' 'unsafe-inline' https://api.mapbox.com https://fonts.googleapis.com",
         "font-src 'self' https://fonts.gstatic.com",
-        "img-src 'self' data: blob: https://cdn.realtor.ca https://*.realtor.ca https://www.realtor.ca https://api.mapbox.com https://cdn.mapbox.com",
+        "img-src 'self' data: blob: https://*.realtor.ca https://api.mapbox.com https://cdn.mapbox.com",
         "connect-src 'self' https://api.mapbox.com https://*.mapbox.com https://events.mapbox.com https://ddfapi.realtor.ca",
         "worker-src 'self' blob:",
         "child-src 'self' blob: https://www.google.com",
@@ -17,9 +20,12 @@ export function middleware(request: NextRequest) {
     ].join('; ')
 
     response.headers.set('Content-Security-Policy', csp)
+    response.headers.set('x-nonce', nonce)
     response.headers.set('X-Content-Type-Options', 'nosniff')
     response.headers.set('X-Frame-Options', 'DENY')
     response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+    response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(self)')
+    response.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload')
 
     return response
 }
