@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
+import { useState, useCallback, useEffect, useRef, useMemo, useSyncExternalStore } from 'react'
 import { ListingMap, type MapBounds } from './ListingMap'
 import { MapPinCard } from './MapPinCard'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
@@ -25,22 +25,42 @@ function appendFilterParams(params: URLSearchParams, filterParams: Record<string
     if (filterParams.office_key) params.set('office_key', filterParams.office_key)
 }
 
+const DESKTOP_QUERY = '(min-width: 1024px)'
+
+function subscribeDesktop(callback: () => void) {
+    const mq = window.matchMedia(DESKTOP_QUERY)
+    mq.addEventListener('change', callback)
+    return () => mq.removeEventListener('change', callback)
+}
+
+function getDesktopSnapshot() {
+    return window.matchMedia(DESKTOP_QUERY).matches
+}
+
+function getDesktopServerSnapshot() {
+    return false
+}
+
 export function MapView({ filterParams }: MapViewProps) {
     const [pins, setPins] = useState<MapPin[] | null>(null)
     const [bounds, setBounds] = useState<MapBounds | null>(null)
     const [page, setPage] = useState(0)
-    const [isDesktop, setIsDesktop] = useState(false)
     const sidebarRef = useRef<HTMLDivElement>(null)
     const abortRef = useRef<AbortController | null>(null)
 
+    // Stabilize filterParams reference to prevent unnecessary re-fetches
+    const filterKey = useMemo(() => JSON.stringify(filterParams), [filterParams])
+    const stableFilterParams = useMemo(() => filterParams, [filterKey]) // eslint-disable-line react-hooks/exhaustive-deps
+
     // Detect desktop (lg breakpoint = 1024px)
-    useEffect(() => {
-        const mq = window.matchMedia('(min-width: 1024px)')
-        setIsDesktop(mq.matches)
-        const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches)
-        mq.addEventListener('change', handler)
-        return () => mq.removeEventListener('change', handler)
-    }, [])
+    const isDesktop = useSyncExternalStore(subscribeDesktop, getDesktopSnapshot, getDesktopServerSnapshot)
+
+    // Reset page when filters change (React-approved "set state during render" pattern)
+    const [prevFilterKey, setPrevFilterKey] = useState(filterKey)
+    if (filterKey !== prevFilterKey) {
+        setPrevFilterKey(filterKey)
+        setPage(0)
+    }
 
     // Fetch pins from API when bounds or filters change (bbox query)
     useEffect(() => {
@@ -53,22 +73,19 @@ export function MapView({ filterParams }: MapViewProps) {
 
         const bbox = `${bounds.west},${bounds.south},${bounds.east},${bounds.north}`
         const params = new URLSearchParams({ bbox })
-        appendFilterParams(params, filterParams)
+        appendFilterParams(params, stableFilterParams)
 
-        fetch(`/api/listings?${params.toString()}`, {
-            signal: controller.signal,
-            priority: 'low' as any,
-        })
-            .then(r => {
+        fetch(`/api/listings?${params.toString()}`, { signal: controller.signal })
+            .then((r) => {
                 if (!r.ok) throw new Error(`API error: ${r.status}`)
                 return r.json()
             })
-            .then(data => {
+            .then((data) => {
                 if (!controller.signal.aborted) {
                     setPins(data.pins || [])
                 }
             })
-            .catch(err => {
+            .catch((err) => {
                 if (err.name !== 'AbortError') {
                     console.error('Failed to fetch listings:', err)
                     setPins([])
@@ -76,7 +93,7 @@ export function MapView({ filterParams }: MapViewProps) {
             })
 
         return () => controller.abort()
-    }, [bounds, filterParams])
+    }, [bounds, stableFilterParams])
 
     // For mobile (no map), fetch without bbox on mount
     useEffect(() => {
@@ -84,19 +101,16 @@ export function MapView({ filterParams }: MapViewProps) {
 
         const params = new URLSearchParams()
         params.set('bbox', SERVICE_AREA_BBOX_STRING)
-        appendFilterParams(params, filterParams)
+        appendFilterParams(params, stableFilterParams)
 
-        fetch(`/api/listings?${params.toString()}`, { priority: 'low' as any })
-            .then(r => {
+        fetch(`/api/listings?${params.toString()}`)
+            .then((r) => {
                 if (!r.ok) throw new Error(`API error: ${r.status}`)
                 return r.json()
             })
-            .then(data => setPins(data.pins || []))
+            .then((data) => setPins(data.pins || []))
             .catch(() => setPins([]))
-    }, [isDesktop, filterParams])
-
-    // Reset page when filters change
-    useEffect(() => { setPage(0) }, [filterParams])
+    }, [isDesktop, stableFilterParams])
 
     // Debounced bounds change
     const boundsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -108,17 +122,15 @@ export function MapView({ filterParams }: MapViewProps) {
         }, 300)
     }, [])
 
-    // Sort pins client-side using shared utility
+    // Sort and re-apply filters client-side (server already filters, but this
+    // also handles sorting which the API does not apply)
     const sortedPins = useMemo(() => {
         if (!pins) return []
-        return filterPins(pins, filterParams)
-    }, [pins, filterParams])
+        return filterPins(pins, stableFilterParams)
+    }, [pins, stableFilterParams])
 
     const totalPages = Math.max(1, Math.ceil(sortedPins.length / PER_PAGE))
-    const sidebarPins = useMemo(
-        () => sortedPins.slice(page * PER_PAGE, (page + 1) * PER_PAGE),
-        [sortedPins, page]
-    )
+    const sidebarPins = useMemo(() => sortedPins.slice(page * PER_PAGE, (page + 1) * PER_PAGE), [sortedPins, page])
 
     // Scroll sidebar to top on page change
     useEffect(() => {
@@ -137,7 +149,8 @@ export function MapView({ filterParams }: MapViewProps) {
                             <span className="text-gray-400">Loading...</span>
                         ) : (
                             <>
-                                Results: <strong className="text-gray-900">{sortedPins.length.toLocaleString()} Listings</strong>
+                                Results:{' '}
+                                <strong className="text-gray-900">{sortedPins.length.toLocaleString()} Listings</strong>
                             </>
                         )}
                     </p>
@@ -156,9 +169,7 @@ export function MapView({ filterParams }: MapViewProps) {
                             </div>
                         ))
                     ) : sidebarPins.length > 0 ? (
-                        sidebarPins.map(pin => (
-                            <MapPinCard key={pin.id} pin={pin} />
-                        ))
+                        sidebarPins.map((pin) => <MapPinCard key={pin.id} pin={pin} />)
                     ) : (
                         <div className="flex items-center justify-center h-full text-gray-500 text-sm p-4 text-center">
                             No listings in the current map area. Try zooming out or panning.
@@ -169,7 +180,7 @@ export function MapView({ filterParams }: MapViewProps) {
                 {!loading && sortedPins.length > PER_PAGE && (
                     <div className="flex items-center justify-center gap-3 px-3 py-2.5 border-t border-gray-200 flex-shrink-0 bg-white">
                         <button
-                            onClick={() => setPage(p => Math.max(0, p - 1))}
+                            onClick={() => setPage((p) => Math.max(0, p - 1))}
                             disabled={page === 0}
                             className="w-8 h-8 flex items-center justify-center rounded-full bg-brand-accent text-white disabled:opacity-30 disabled:cursor-not-allowed"
                         >
@@ -179,7 +190,7 @@ export function MapView({ filterParams }: MapViewProps) {
                             {page + 1} of {totalPages}
                         </span>
                         <button
-                            onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+                            onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                             disabled={page === totalPages - 1}
                             className="w-8 h-8 flex items-center justify-center rounded-full bg-brand-accent text-white disabled:opacity-30 disabled:cursor-not-allowed"
                         >
