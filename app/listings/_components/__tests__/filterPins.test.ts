@@ -105,4 +105,41 @@ describe('filterPins', () => {
         expect(result[1].id).toBe('c')
         expect(result[2].id).toBe('a')
     })
+
+    it('returns empty array for empty input', () => {
+        expect(filterPins([], {})).toHaveLength(0)
+        expect(filterPins([], { tt: 'sale', lp: '100' })).toHaveLength(0)
+    })
+
+    it('handles zero as a valid min price filter', () => {
+        const result = filterPins(pins, { lp: '0' })
+        expect(result).toHaveLength(4)
+    })
+
+    it('handles zero as a valid min beds filter', () => {
+        const result = filterPins(pins, { bd: '0' })
+        expect(result).toHaveLength(4)
+    })
+
+    it('handles zero as a valid min baths filter', () => {
+        const result = filterPins(pins, { ba: '0' })
+        expect(result).toHaveLength(4)
+    })
+
+    it('ignores non-numeric filter values', () => {
+        const result = filterPins(pins, { lp: 'abc', hp: 'xyz', bd: 'foo', ba: 'bar' })
+        expect(result).toHaveLength(4)
+    })
+
+    it('sorts pins with missing listDate to the end', () => {
+        const dated = [
+            makePin({ id: 'a', listDate: '2025-01-01' }),
+            makePin({ id: 'b', listDate: '' }),
+            makePin({ id: 'c', listDate: '2025-03-01' }),
+        ]
+        const result = filterPins(dated, {})
+        expect(result[0].id).toBe('c')
+        expect(result[1].id).toBe('a')
+        expect(result[2].id).toBe('b')
+    })
 })

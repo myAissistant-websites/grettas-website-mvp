@@ -131,6 +131,19 @@ describe('parseFilterParams', () => {
         const result = parseFilterParams({ sortDirection: 'sideways' })
         expect(result.sortDirection).toBeUndefined()
     })
+
+    it('returns undefined for non-numeric price values', () => {
+        const result = parseFilterParams({ lp: 'abc', hp: 'not-a-number' })
+        expect(result.minPrice).toBeUndefined()
+        expect(result.maxPrice).toBeUndefined()
+    })
+
+    it('parses zero values correctly', () => {
+        const result = parseFilterParams({ lp: '0', bd: '0', ba: '0' })
+        expect(result.minPrice).toBe(0)
+        expect(result.beds).toBe(0)
+        expect(result.baths).toBe(0)
+    })
 })
 
 // ─── buildODataFilter ───────────────────────────────────────────────────
@@ -191,6 +204,39 @@ describe('buildODataFilter', () => {
     it('escapes OData injection in property type', () => {
         const result = buildODataFilter({ propertyType: "Row / Town'house", transactionType: 'sale' })
         expect(result).toContain("StructureType/any(s: s eq 'Row / Town''house')")
+    })
+
+    it('handles "all" transaction type with price filters', () => {
+        const result = buildODataFilter({ minPrice: 200000, maxPrice: 500000 })
+        expect(result).toContain('ListPrice gt 0')
+        expect(result).toContain('ListPrice ge 200000')
+        expect(result).toContain('ListPrice le 500000')
+        expect(result).toContain('TotalActualRent gt 0')
+        expect(result).toContain('TotalActualRent ge 200000')
+        expect(result).toContain('TotalActualRent le 500000')
+    })
+
+    it('handles "all" transaction type without price filters', () => {
+        const result = buildODataFilter({})
+        expect(result).toContain('(ListPrice gt 0 or TotalActualRent gt 0)')
+    })
+
+    it('includes beds filter with zero value', () => {
+        const result = buildODataFilter({ beds: 0, transactionType: 'sale' })
+        expect(result).toContain('BedroomsTotal ge 0')
+    })
+
+    it('includes min price filter with zero value', () => {
+        const result = buildODataFilter({ transactionType: 'sale', minPrice: 0 })
+        expect(result).toContain('ListPrice ge 0')
+    })
+
+    it('handles "all" transaction type with only maxPrice', () => {
+        const result = buildODataFilter({ maxPrice: 500000 })
+        expect(result).toContain('ListPrice le 500000')
+        expect(result).toContain('TotalActualRent le 500000')
+        expect(result).not.toContain('ListPrice ge')
+        expect(result).not.toContain('TotalActualRent ge')
     })
 })
 
