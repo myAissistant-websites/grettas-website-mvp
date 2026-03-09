@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-export function middleware(request: NextRequest) {
+export function middleware(_request: NextRequest) {
     const response = NextResponse.next()
 
     // TODO: switch to nonce-based CSP once Next.js experimental nonce propagation
@@ -17,7 +17,7 @@ export function middleware(request: NextRequest) {
         "connect-src 'self' https://basemaps.cartocdn.com https://ddfapi.realtor.ca",
         "worker-src 'self' blob:",
         "child-src 'self' blob: https://www.google.com",
-        "frame-src https://www.google.com https://maps.google.com",
+        'frame-src https://www.google.com https://maps.google.com',
     ].join('; ')
 
     response.headers.set('Content-Security-Policy', csp)
