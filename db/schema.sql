@@ -264,4 +264,4 @@ BEGIN
       AND (filter_property_type IS NULL OR l.property_type = filter_property_type)
     LIMIT max_results;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
+$$ LANGUAGE plpgsql SECURITY INVOKER STABLE;

@@ -432,7 +432,7 @@ export async function getListing(listingId: string): Promise<Listing> {
 
     const token = await getDdfToken()
     const params = new URLSearchParams()
-    params.set('$filter', `ListingKey eq '${listingId}'`)
+    params.set('$filter', `ListingKey eq '${odataString(listingId)}'`)
     params.set('$expand', 'Rooms')
 
     let res = await fetch(`${DDF_API_BASE}/Property?${params.toString()}`, {
@@ -494,16 +494,15 @@ export async function getFeaturedListings(limit = 6): Promise<Listing[]> {
 
 // ─── Fetch Abdul's Own Listings ──────────────────────────────────────────
 
-const ABDUL_AGENT_KEY = '2151491'
+const AGENT_KEY = process.env.AGENT_KEY || ''
 
 /**
- * Fetches listings specifically belonging to Abdul (the agent).
- * Uses the hardcoded agent key to filtered CREA DDF results.
- * 
- * @returns Array of listings where Abdul is the primary listing agent
+ * Fetches listings belonging to the configured agent (AGENT_KEY env var).
+ *
+ * @returns Array of listings where the agent is the primary listing agent
  */
 export async function getAgentListings(): Promise<Listing[]> {
-    if (!DDF_CLIENT_ID) {
+    if (!DDF_CLIENT_ID || !AGENT_KEY) {
         const { mockListings } = await import('./mock-listings')
         return mockListings.slice(0, 6)
     }
@@ -511,7 +510,7 @@ export async function getAgentListings(): Promise<Listing[]> {
     const token = await getDdfToken()
     const params = new URLSearchParams()
     params.set('$top', '50')
-    params.set('$filter', `ListAgentKey eq '${ABDUL_AGENT_KEY}'`)
+    params.set('$filter', `ListAgentKey eq '${odataString(AGENT_KEY)}'`)
     params.set('$orderby', 'ModificationTimestamp desc')
 
     const res = await fetch(`${DDF_API_BASE}/Property?${params.toString()}`, {

@@ -5,6 +5,7 @@ import { ListingMap, type MapBounds } from './ListingMap'
 import { MapPinCard } from './MapPinCard'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import type { MapPin } from '@/lib/listings'
+import { filterPins } from '@/lib/filter-pins'
 
 interface MapViewProps {
     filterParams: Record<string, string>
@@ -57,7 +58,10 @@ export function MapView({ filterParams }: MapViewProps) {
             signal: controller.signal,
             priority: 'low' as any,
         })
-            .then(r => r.json())
+            .then(r => {
+                if (!r.ok) throw new Error(`API error: ${r.status}`)
+                return r.json()
+            })
             .then(data => {
                 if (!controller.signal.aborted) {
                     setPins(data.pins || [])
@@ -90,7 +94,10 @@ export function MapView({ filterParams }: MapViewProps) {
         if (filterParams.office_key) params.set('office_key', filterParams.office_key)
 
         fetch(`/api/listings?${params.toString()}`, { priority: 'low' as any })
-            .then(r => r.json())
+            .then(r => {
+                if (!r.ok) throw new Error(`API error: ${r.status}`)
+                return r.json()
+            })
             .then(data => setPins(data.pins || []))
             .catch(() => setPins([]))
     }, [isDesktop, filterParams])
@@ -108,23 +115,11 @@ export function MapView({ filterParams }: MapViewProps) {
         }, 300)
     }, [])
 
-    // Sort pins client-side
+    // Sort pins client-side using shared utility
     const sortedPins = useMemo(() => {
         if (!pins) return []
-        const sorted = [...pins]
-        const sortField = filterParams.sortField
-        const sortDir = filterParams.sortDirection || 'desc'
-        if (sortField === 'listingPrice') {
-            sorted.sort((a, b) => sortDir === 'asc' ? a.price - b.price : b.price - a.price)
-        } else {
-            sorted.sort((a, b) => {
-                const da = a.listDate ? new Date(a.listDate).getTime() : 0
-                const db = b.listDate ? new Date(b.listDate).getTime() : 0
-                return sortDir === 'asc' ? da - db : db - da
-            })
-        }
-        return sorted
-    }, [pins, filterParams.sortField, filterParams.sortDirection])
+        return filterPins(pins, filterParams)
+    }, [pins, filterParams])
 
     const totalPages = Math.max(1, Math.ceil(sortedPins.length / PER_PAGE))
     const sidebarPins = useMemo(

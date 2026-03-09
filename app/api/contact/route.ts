@@ -54,6 +54,12 @@ export async function POST(request: Request) {
 
         const { firstName, lastName, email, phone, message, intent, language, listingAddress } = result.data
 
+        const recipient = process.env.CONTACT_FORM_RECIPIENT
+        if (!recipient) {
+            console.error('CONTACT_FORM_RECIPIENT env var is not configured')
+            return Response.json({ success: false, error: 'Contact form is not configured' }, { status: 500 })
+        }
+
         const safeFirstName = escapeHtml(firstName)
         const safeLastName = escapeHtml(lastName)
         const safeEmail = escapeHtml(email)
@@ -65,7 +71,7 @@ export async function POST(request: Request) {
 
         const { error } = await resend.emails.send({
             from: 'Abdul Basharmal <no-reply@abdulsellshomes.com>',
-            to: process.env.CONTACT_FORM_RECIPIENT || 'jonvan225@gmail.com',
+            to: recipient,
             replyTo: email,
             subject: `New ${safeIntent || 'Contact'} Inquiry from ${safeFirstName} ${safeLastName}`,
             html: `
