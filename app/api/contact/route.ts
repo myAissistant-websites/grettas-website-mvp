@@ -65,7 +65,7 @@ export async function POST(request: Request) {
 
         const { error } = await resend.emails.send({
             from: 'Abdul Basharmal <no-reply@abdulsellshomes.com>',
-            to: 'jonvan225@gmail.com',
+            to: process.env.CONTACT_FORM_RECIPIENT || 'jonvan225@gmail.com',
             replyTo: email,
             subject: `New ${safeIntent || 'Contact'} Inquiry from ${safeFirstName} ${safeLastName}`,
             html: `
