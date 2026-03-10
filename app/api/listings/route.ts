@@ -128,8 +128,17 @@ export async function GET(request: NextRequest) {
             from += PAGE_SIZE
         }
 
+        // Deduplicate in case pagination returned overlapping rows
+        const seen = new Set<string>()
+        const uniqueRows = allRows.filter((row) => {
+            const id = row.id as string
+            if (seen.has(id)) return false
+            seen.add(id)
+            return true
+        })
+
         return NextResponse.json(
-            { pins: allRows, totalCount: allRows.length },
+            { pins: uniqueRows, totalCount: uniqueRows.length },
             {
                 headers: {
                     'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',

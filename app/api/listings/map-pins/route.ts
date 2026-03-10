@@ -39,9 +39,18 @@ export async function GET(_request: NextRequest) {
             from += PAGE_SIZE
         }
 
+        // Deduplicate in case pagination returned overlapping rows
+        const seen = new Set<string>()
+        const uniqueRows = allRows.filter((row) => {
+            const id = row.id as string
+            if (seen.has(id)) return false
+            seen.add(id)
+            return true
+        })
+
         return NextResponse.json({
-            pins: allRows,
-            totalCount: allRows.length,
+            pins: uniqueRows,
+            totalCount: uniqueRows.length,
         })
     } catch (error) {
         console.error('Map pins query error:', error)
