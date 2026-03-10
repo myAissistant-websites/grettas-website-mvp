@@ -4,9 +4,18 @@ import { supabase } from '@/lib/db'
 const VALID_STATUSES = new Set(['Active', 'Sold', 'Pending'])
 const VALID_TRANSACTION_TYPES = new Set(['sale', 'rent'])
 const VALID_PROPERTY_TYPES = new Set([
-    'House', 'Apartment', 'Row / Townhouse', 'Duplex', 'Triplex',
-    'Fourplex', 'Mobile Home', 'Manufactured Home/Mobile', 'Land',
-    'Residential', 'Commercial', 'Vacant Land',
+    'House',
+    'Apartment',
+    'Row / Townhouse',
+    'Duplex',
+    'Triplex',
+    'Fourplex',
+    'Mobile Home',
+    'Manufactured Home/Mobile',
+    'Land',
+    'Residential',
+    'Commercial',
+    'Vacant Land',
 ])
 
 function safeNum(value: string | null): number | undefined {
@@ -47,7 +56,7 @@ export async function GET(request: NextRequest) {
     }
 
     const parts = bbox.split(',').map(Number)
-    if (parts.length !== 4 || parts.some(n => !Number.isFinite(n))) {
+    if (parts.length !== 4 || parts.some((n) => !Number.isFinite(n))) {
         return NextResponse.json({ error: 'Invalid bbox format. Expected: west,south,east,north' }, { status: 400 })
     }
 
@@ -57,7 +66,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid bbox coordinates' }, { status: 400 })
     }
 
-    const rpcParams: Record<string, any> = {
+    const rpcParams: Record<string, string | number | boolean> = {
         bbox_west: west,
         bbox_south: south,
         bbox_east: east,
@@ -96,16 +105,31 @@ export async function GET(request: NextRequest) {
     const limit = safeNum(params.get('limit'))
     rpcParams.max_results = Math.min(limit || 5000, 10000)
 
-    try {
-        const { data, error } = await supabase.rpc('get_listings_in_bbox', rpcParams)
+    const maxResults = rpcParams.max_results as number
+    const PAGE_SIZE = 1000
 
-        if (error) {
-            console.error('Listings RPC error:', error)
-            return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    try {
+        const allRows: Record<string, unknown>[] = []
+        let from = 0
+
+        while (from < maxResults) {
+            const to = Math.min(from + PAGE_SIZE - 1, maxResults - 1)
+            const { data, error } = await supabase.rpc('get_listings_in_bbox', rpcParams).range(from, to)
+
+            if (error) {
+                console.error('Listings RPC error:', error)
+                return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+            }
+
+            const rows = data || []
+            allRows.push(...rows)
+
+            if (rows.length < PAGE_SIZE) break
+            from += PAGE_SIZE
         }
 
         return NextResponse.json(
-            { pins: data || [], totalCount: data?.length || 0 },
+            { pins: allRows, totalCount: allRows.length },
             {
                 headers: {
                     'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
