@@ -101,28 +101,29 @@ function ClusterOverlay({
     const mapW = parentEl?.clientWidth || 1000
     const mapH = parentEl?.clientHeight || 600
 
-    const style: React.CSSProperties = { position: 'absolute', width: OVERLAY_W, zIndex: 50 }
+    const style: React.CSSProperties = { position: 'absolute', width: OVERLAY_W, zIndex: 50, maxHeight: mapH - 24 }
     const pinX = data.screenX
     const pinY = data.screenY
     const GAP = 12
+    const PADDING = 12
 
     if (pinX > mapW / 2) {
-        style.right = mapW - pinX + GAP
+        style.right = Math.max(PADDING, mapW - pinX + GAP)
     } else {
-        style.left = pinX + GAP
+        style.left = Math.min(pinX + GAP, mapW - OVERLAY_W - PADDING)
     }
 
     if (pinY > mapH / 2) {
-        style.bottom = mapH - pinY + GAP
+        style.bottom = Math.max(PADDING, mapH - pinY + GAP)
     } else {
-        style.top = pinY + GAP
+        style.top = Math.min(pinY + GAP, mapH - 300 - PADDING)
     }
 
     return (
         <div
             ref={containerRef}
             style={style}
-            className="bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden"
+            className="bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden flex flex-col"
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
             onClick={(e) => e.stopPropagation()}
@@ -133,7 +134,7 @@ function ClusterOverlay({
                 </span>
             </div>
 
-            <div className="max-h-[260px] overflow-y-auto">
+            <div className="overflow-y-auto" style={{ maxHeight: 230 }}>
                 {pageListings.map((pin) => (
                     <Link
                         key={pin.id}
@@ -200,17 +201,23 @@ function PinMarker({ pin, onClick }: { pin: MapPin; onClick: (pin: MapPin) => vo
             onClick={(e) => { e.originalEvent.stopPropagation(); onClick(pin) }}
         >
             <div className="flex flex-col items-center cursor-pointer group">
-                <div className="bg-brand-accent text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-md whitespace-nowrap group-hover:bg-brand-accent-light transition-colors">
-                    {formatPrice(pin.price)}
-                </div>
-                <div
-                    className="w-0 h-0 -mt-[1px]"
-                    style={{
-                        borderLeft: '5px solid transparent',
-                        borderRight: '5px solid transparent',
-                        borderTop: `5px solid var(--color-accent)`,
-                    }}
-                />
+                <svg width="30" height="40" viewBox="0 0 30 40" className="drop-shadow-md">
+                    <path
+                        d="M15 0C6.716 0 0 6.716 0 15c0 10.5 15 25 15 25s15-14.5 15-25C30 6.716 23.284 0 15 0z"
+                        className="fill-brand-accent group-hover:fill-brand-accent-light transition-colors"
+                    />
+                    <text
+                        x="15"
+                        y="16"
+                        textAnchor="middle"
+                        dominantBaseline="central"
+                        fill="white"
+                        fontSize="7"
+                        fontWeight="bold"
+                    >
+                        {formatPrice(pin.price)}
+                    </text>
+                </svg>
             </div>
         </Marker>
     )
@@ -231,16 +238,33 @@ function ClusterMarker({
     onHover: (e: React.MouseEvent) => void
     onLeave: () => void
 }) {
-    const size = count < 10 ? 36 : count < 100 ? 42 : 50
+    const svgWidth = count < 10 ? 30 : count < 100 ? 36 : 42
+    const svgHeight = count < 10 ? 40 : count < 100 ? 48 : 56
+    const fontSize = count < 10 ? 12 : count < 100 ? 12 : 11
     return (
-        <Marker latitude={lat} longitude={lng} anchor="center" onClick={(e) => { e.originalEvent.stopPropagation(); onClick() }}>
+        <Marker latitude={lat} longitude={lng} anchor="bottom" onClick={(e) => { e.originalEvent.stopPropagation(); onClick() }}>
             <div
-                className="rounded-full bg-brand-accent text-white flex items-center justify-center font-bold shadow-lg cursor-pointer hover:bg-brand-accent-light transition-colors border-2 border-white"
-                style={{ width: size, height: size, fontSize: count < 100 ? 13 : 11 }}
+                className="cursor-pointer"
                 onMouseEnter={onHover}
                 onMouseLeave={onLeave}
             >
-                {count.toLocaleString()}
+                <svg width={svgWidth} height={svgHeight} viewBox="0 0 30 40" className="drop-shadow-lg">
+                    <path
+                        d="M15 0C6.716 0 0 6.716 0 15c0 10.5 15 25 15 25s15-14.5 15-25C30 6.716 23.284 0 15 0z"
+                        className="fill-brand-accent hover:fill-brand-accent-light transition-colors"
+                    />
+                    <text
+                        x="15"
+                        y="14"
+                        textAnchor="middle"
+                        dominantBaseline="central"
+                        fill="white"
+                        fontSize={fontSize}
+                        fontWeight="bold"
+                    >
+                        {count.toLocaleString()}
+                    </text>
+                </svg>
             </div>
         </Marker>
     )
@@ -356,7 +380,7 @@ export function ListingMap({ pins, onBoundsChange }: ListingMapProps) {
     }, [supercluster, pinMap])
 
     return (
-        <div ref={mapContainerRef} className="relative w-full h-full">
+        <div ref={mapContainerRef} className="relative w-full h-full overflow-hidden">
             <Map
                 ref={mapRef}
                 initialViewState={{ ...DEFAULT_CENTER, zoom: DEFAULT_ZOOM }}
