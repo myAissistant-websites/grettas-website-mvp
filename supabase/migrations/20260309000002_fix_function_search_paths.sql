@@ -1,0 +1,4 @@
+-- Fix mutable search_path on functions to prevent search path hijacking
+-- NOTE: This migration was superseded by 20260309000003_drop_duplicate_functions.sql
+-- which drops duplicates created by VARCHAR/text type mismatch and recreates
+-- the functions with correct text types and search_path = ''.
