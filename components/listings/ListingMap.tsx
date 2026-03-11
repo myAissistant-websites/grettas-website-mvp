@@ -199,18 +199,18 @@ function PinMarker({ pin, onClick }: { pin: MapPin; onClick: (pin: MapPin) => vo
             anchor="bottom"
             onClick={(e) => { e.originalEvent.stopPropagation(); onClick(pin) }}
         >
-            <div className="flex flex-col items-center cursor-pointer group">
-                <div className="bg-brand-accent text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-md whitespace-nowrap group-hover:bg-brand-accent-light transition-colors">
-                    {formatPrice(pin.price)}
-                </div>
-                <div
-                    className="w-0 h-0 -mt-[1px]"
-                    style={{
-                        borderLeft: '5px solid transparent',
-                        borderRight: '5px solid transparent',
-                        borderTop: `5px solid var(--color-accent)`,
-                    }}
-                />
+            <div className="cursor-pointer group" style={{ filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.3))' }}>
+                <svg width="40" height="50" viewBox="0 0 40 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M20 49C20 49 38 30.5 38 18.5C38 8.835 29.941 1 20 1C10.059 1 2 8.835 2 18.5C2 30.5 20 49 20 49Z"
+                        className="fill-brand-accent group-hover:fill-brand-accent-light transition-colors"
+                        stroke="white"
+                        strokeWidth="1.5"
+                    />
+                    <text x="20" y="22" textAnchor="middle" fill="white" fontSize="10" fontWeight="700" fontFamily="system-ui, sans-serif">
+                        {formatPrice(pin.price)}
+                    </text>
+                </svg>
             </div>
         </Marker>
     )
@@ -231,16 +231,28 @@ function ClusterMarker({
     onHover: (e: React.MouseEvent) => void
     onLeave: () => void
 }) {
-    const size = count < 10 ? 36 : count < 100 ? 42 : 50
+    const w = count < 10 ? 40 : count < 100 ? 46 : count < 1000 ? 52 : 58
+    const h = Math.round(w * 1.25)
+    const fontSize = count < 10 ? 11 : count < 100 ? 11 : count < 1000 ? 10 : 9
     return (
-        <Marker latitude={lat} longitude={lng} anchor="center" onClick={(e) => { e.originalEvent.stopPropagation(); onClick() }}>
+        <Marker latitude={lat} longitude={lng} anchor="bottom" onClick={(e) => { e.originalEvent.stopPropagation(); onClick() }}>
             <div
-                className="rounded-full bg-brand-accent text-white flex items-center justify-center font-bold shadow-lg cursor-pointer hover:bg-brand-accent-light transition-colors border-2 border-white"
-                style={{ width: size, height: size, fontSize: count < 100 ? 13 : 11 }}
+                className="cursor-pointer group"
+                style={{ filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.3))' }}
                 onMouseEnter={onHover}
                 onMouseLeave={onLeave}
             >
-                {count.toLocaleString()}
+                <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d={`M${w / 2} ${h - 1}C${w / 2} ${h - 1} ${w - 2} ${h * 0.62} ${w - 2} ${w * 0.47}C${w - 2} ${w * 0.22} ${w * 0.75} 1 ${w / 2} 1C${w * 0.25} 1 2 ${w * 0.22} 2 ${w * 0.47}C2 ${h * 0.62} ${w / 2} ${h - 1} ${w / 2} ${h - 1}Z`}
+                        className="fill-brand-accent group-hover:fill-brand-accent-light transition-colors"
+                        stroke="white"
+                        strokeWidth="1.5"
+                    />
+                    <text x={w / 2} y={w * 0.52} textAnchor="middle" dominantBaseline="central" fill="white" fontSize={fontSize} fontWeight="700" fontFamily="system-ui, sans-serif">
+                        {count.toLocaleString()}
+                    </text>
+                </svg>
             </div>
         </Marker>
     )
