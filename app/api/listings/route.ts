@@ -1,97 +1,144 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAllMapPins, parseFilterParams, filterBySearchQuery, type MapPin } from '@/lib/listings'
+import { supabase } from '@/lib/db'
 
-// ─── Server-side pin cache ──────────────────────────────────────────────
-// Caches the full DDF API result for 5 minutes per filter combination.
-// This eliminates the 10-15s DDF fetch on every map pan/zoom/filter change.
-const PIN_CACHE_TTL = 5 * 60 * 1000 // 5 minutes
-const pinCache = new Map<string, { pins: MapPin[]; totalCount: number; expiresAt: number; promise?: Promise<{ pins: MapPin[]; totalCount: number }> }>()
+const VALID_STATUSES = new Set(['Active', 'Sold', 'Pending'])
+const VALID_TRANSACTION_TYPES = new Set(['sale', 'rent'])
+const VALID_PROPERTY_TYPES = new Set([
+    'House',
+    'Apartment',
+    'Row / Townhouse',
+    'Duplex',
+    'Triplex',
+    'Fourplex',
+    'Mobile Home',
+    'Manufactured Home/Mobile',
+    'Land',
+    'Residential',
+    'Commercial',
+    'Vacant Land',
+])
 
-function getCacheKey(filterObj: Record<string, string>): string {
-    // Only include DDF-relevant filter keys (not bbox, q, sort — those are client-side)
-    const relevant = ['tt', 'lp', 'hp', 'bd', 'ba', 'pt', 'bt', 'city'] as const
-    return relevant.map(k => `${k}=${filterObj[k] || ''}`).join('&')
+function safeNum(value: string | null): number | undefined {
+    if (value == null || value === '') return undefined
+    const n = Number(value)
+    return Number.isFinite(n) ? n : undefined
 }
 
-async function getCachedPins(filterObj: Record<string, string>): Promise<{ pins: MapPin[]; totalCount: number }> {
-    const key = getCacheKey(filterObj)
-    const cached = pinCache.get(key)
-
-    // Return fresh cache immediately
-    if (cached && Date.now() < cached.expiresAt) {
-        return { pins: cached.pins, totalCount: cached.totalCount }
-    }
-
-    // If stale cache exists, return it immediately and refresh in background
-    if (cached && cached.pins.length > 0) {
-        if (!cached.promise) {
-            cached.promise = fetchAndCache(filterObj, key)
-        }
-        return { pins: cached.pins, totalCount: cached.totalCount }
-    }
-
-    // No cache at all — must wait for fetch
-    // Deduplicate concurrent requests for the same key
-    if (cached?.promise) {
-        return cached.promise
-    }
-
-    const promise = fetchAndCache(filterObj, key)
-    pinCache.set(key, { pins: [], totalCount: 0, expiresAt: 0, promise })
-    return promise
-}
-
-async function fetchAndCache(filterObj: Record<string, string>, key: string): Promise<{ pins: MapPin[]; totalCount: number }> {
-    try {
-        const filters = parseFilterParams(filterObj)
-        const result = await getAllMapPins(filters)
-        pinCache.set(key, { pins: result.pins, totalCount: result.totalCount, expiresAt: Date.now() + PIN_CACHE_TTL })
-        return result
-    } catch (error) {
-        pinCache.delete(key)
-        throw error
-    }
-}
+const KEY_PATTERN = /^[a-zA-Z0-9_-]{1,50}$/
 
 /**
- * GET /api/listings?bbox=lng1,lat1,lng2,lat2
+ * GET /api/listings?bbox=lng1,lat1,lng2,lat2&agent_id=123
  *
- * Returns listings within a bounding box via DDF API.
- * Filters are passed as query params (tt, lp, hp, bd, ba, pt).
+ * Returns listings within a bounding box, with optional multi-tenant filtering.
+ * Uses a PostGIS RPC function on Supabase for spatial queries.
+ *
+ * Query params:
+ *   bbox       - required: "west,south,east,north"
+ *   agent_id   - optional: filter by agent's internal ID
+ *   office_id  - optional: filter by office's internal ID
+ *   agent_key  - optional: filter by CREA agent key
+ *   office_key - optional: filter by CREA office key
+ *   status     - optional: Active|Sold|Pending (default: Active)
+ *   tt         - optional: sale|rent (transaction type)
+ *   lp         - optional: min price
+ *   hp         - optional: max price
+ *   bd         - optional: min beds
+ *   ba         - optional: min baths
+ *   pt         - optional: property type
+ *   limit      - optional: max results (default: 5000)
  */
 export async function GET(request: NextRequest) {
     const params = request.nextUrl.searchParams
 
-    // Build filter params from query string
-    const filterObj: Record<string, string> = {}
-    for (const key of ['tt', 'lp', 'hp', 'bd', 'ba', 'pt', 'bt', 'city', 'q']) {
-        const val = params.get(key)
-        if (val) filterObj[key] = val
+    const bbox = params.get('bbox')
+    if (!bbox) {
+        return NextResponse.json({ error: 'bbox parameter is required (west,south,east,north)' }, { status: 400 })
     }
 
+    const parts = bbox.split(',').map(Number)
+    if (parts.length !== 4 || parts.some((n) => !Number.isFinite(n))) {
+        return NextResponse.json({ error: 'Invalid bbox format. Expected: west,south,east,north' }, { status: 400 })
+    }
+
+    const [west, south, east, north] = parts
+
+    if (south < -90 || north > 90 || west < -180 || east > 180 || south >= north) {
+        return NextResponse.json({ error: 'Invalid bbox coordinates' }, { status: 400 })
+    }
+
+    const rpcParams: Record<string, string | number | boolean> = {
+        bbox_west: west,
+        bbox_south: south,
+        bbox_east: east,
+        bbox_north: north,
+    }
+
+    const agentId = safeNum(params.get('agent_id'))
+    const officeId = safeNum(params.get('office_id'))
+    if (agentId) rpcParams.filter_agent_id = agentId
+    if (officeId) rpcParams.filter_office_id = officeId
+
+    const agentKey = params.get('agent_key')
+    const officeKey = params.get('office_key')
+    if (agentKey && KEY_PATTERN.test(agentKey)) rpcParams.filter_agent_key = agentKey
+    if (officeKey && KEY_PATTERN.test(officeKey)) rpcParams.filter_office_key = officeKey
+
+    const status = params.get('status')
+    if (status && VALID_STATUSES.has(status)) rpcParams.filter_status = status
+
+    const tt = params.get('tt')
+    if (tt && VALID_TRANSACTION_TYPES.has(tt)) rpcParams.filter_tt = tt
+
+    const lp = safeNum(params.get('lp'))
+    const hp = safeNum(params.get('hp'))
+    if (lp != null) rpcParams.filter_min_price = lp
+    if (hp != null) rpcParams.filter_max_price = hp
+
+    const bd = safeNum(params.get('bd'))
+    const ba = safeNum(params.get('ba'))
+    if (bd != null) rpcParams.filter_min_beds = bd
+    if (ba != null) rpcParams.filter_min_baths = ba
+
+    const pt = params.get('pt')
+    if (pt && VALID_PROPERTY_TYPES.has(pt)) rpcParams.filter_property_type = pt
+
+    const limit = safeNum(params.get('limit'))
+    rpcParams.max_results = Math.min(limit || 5000, 10000)
+
+    const maxResults = rpcParams.max_results as number
+    const PAGE_SIZE = 1000
+
     try {
-        const searchQuery = filterObj.q
-        delete filterObj.q // Don't pass to OData or cache key
+        const allRows: Record<string, unknown>[] = []
+        let from = 0
 
-        const { pins } = await getCachedPins(filterObj)
+        while (from < maxResults) {
+            const to = Math.min(from + PAGE_SIZE - 1, maxResults - 1)
+            const { data, error } = await supabase.rpc('get_listings_in_bbox', rpcParams).range(from, to)
 
-        // Filter by search query (address matching)
-        let filteredPins = filterBySearchQuery(pins, searchQuery)
-
-        // If bbox is provided, filter by bounds
-        const bbox = params.get('bbox')
-        if (bbox) {
-            const [west, south, east, north] = bbox.split(',').map(Number)
-            if (![west, south, east, north].some(isNaN)) {
-                filteredPins = filteredPins.filter(p =>
-                    p.lat >= south && p.lat <= north &&
-                    p.lng >= west && p.lng <= east
-                )
+            if (error) {
+                console.error('Listings RPC error:', error)
+                return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
             }
+
+            const rows = data || []
+            allRows.push(...rows)
+
+            if (rows.length < PAGE_SIZE) break
+            from += PAGE_SIZE
         }
 
+        // Deduplicate in case pagination returned overlapping rows
+        const seen = new Set<string>()
+        const uniqueRows = allRows.filter((row) => {
+            const id = row.id as string
+            if (seen.has(id)) return false
+            seen.add(id)
+            return true
+        })
+
         return NextResponse.json(
-            { pins: filteredPins, totalCount: filteredPins.length },
+            { pins: uniqueRows, totalCount: uniqueRows.length },
             {
                 headers: {
                     'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
@@ -100,6 +147,6 @@ export async function GET(request: NextRequest) {
         )
     } catch (error) {
         console.error('Listings query error:', error)
-        return NextResponse.json({ pins: [], totalCount: 0 }, { status: 500 })
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 }

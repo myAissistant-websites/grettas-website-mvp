@@ -1,18 +1,15 @@
 import { Metadata } from 'next'
-import { cache } from 'react'
 import { getListing } from '@/lib/listings'
-
-const getCachedListing = cache((id: string) => getListing(id))
-import { ImageGallery } from '@/components/listings/ImageGallery'
-import { ListingDisclaimer } from '@/components/listings/ListingDisclaimer'
-import { ContactForm } from '@/components/shared/ContactForm'
+import { ImageGallery } from '../_components/ImageGallery'
+import { ListingDisclaimer } from '../_components/ListingDisclaimer'
+import { ContactForm } from '@/components/ContactForm'
 import { Bed, Bath, Maximize, Car, Calendar, MapPin, ExternalLink, Home } from 'lucide-react'
-import { MobileContactSheet } from '@/components/listings/MobileContactSheet'
+import { MobileContactSheet } from '../_components/MobileContactSheet'
 import Image from 'next/image'
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
     const unresolvedParams = await params
-    const listing = await getCachedListing(unresolvedParams.id)
+    const listing = await getListing(unresolvedParams.id)
     return {
         title: `${listing.address.full} - $${listing.price.toLocaleString()}`,
         description: `${listing.beds} bed, ${listing.baths} bath home at ${listing.address.full}. Listed at $${listing.price.toLocaleString()}. Contact Abdul Basharmal to book a showing.`,
@@ -36,7 +33,7 @@ export default async function ListingDetailPage({
     params: Promise<{ id: string }>
 }) {
     const unresolvedParams = await params
-    const listing = await getCachedListing(unresolvedParams.id)
+    const listing = await getListing(unresolvedParams.id)
 
     if (!listing) {
         return (
@@ -75,7 +72,7 @@ export default async function ListingDetailPage({
                 </div>
 
                 {/* Photo Grid */}
-                <ImageGallery photos={listing.photos} />
+                <ImageGallery photos={listing.photos} address={listing.address.full} />
 
                 {/* Quick Stats Bar — right below photos */}
                 <div className="flex flex-wrap items-center gap-x-8 gap-y-3 py-5 border-b border-gray-200">

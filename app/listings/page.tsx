@@ -1,11 +1,11 @@
 import { Metadata } from 'next'
-import { getListings, ListingFilters } from '@/lib/listings'
-import { ListingSearch } from '@/components/listings/ListingSearch'
-import { ListingCard } from '@/components/listings/ListingCard'
-import { ListingDisclaimer } from '@/components/listings/ListingDisclaimer'
-import { Pagination } from '@/components/listings/Pagination'
-import { MapView } from './MapView'
-import { ListingsTermsGate } from '@/components/listings/ListingsTermsGate'
+import { getListings, getListingCount, ListingFilters } from '@/lib/listings'
+import { ListingSearch } from './_components/ListingSearch'
+import { ListingCard } from './_components/ListingCard'
+import { ListingDisclaimer } from './_components/ListingDisclaimer'
+import { Pagination } from './_components/Pagination'
+import { MapViewLoader } from './_components/MapViewLoader'
+import { ListingsTermsGate } from './_components/ListingsTermsGate'
 
 export const metadata: Metadata = {
     title: 'Search Listings | Kitchener, Waterloo & Cambridge',
@@ -38,7 +38,6 @@ export default async function ListingsPage({
         yearBuilt: unresolvedSearchParams.yb ? Number(unresolvedSearchParams.yb) : undefined,
         sortField: unresolvedSearchParams.sortField as 'listingPrice' | 'listingDate' | undefined,
         sortDirection: unresolvedSearchParams.sortDirection as 'asc' | 'desc' | undefined,
-        searchQuery: unresolvedSearchParams.q as string | undefined,
         limit: PAGE_SIZE,
         offset: (page - 1) * PAGE_SIZE,
     }
@@ -52,13 +51,15 @@ export default async function ListingsPage({
     })
 
     if (view === 'map') {
-        // Map view: skip server-side count — pins are fetched client-side
+        // Map view: fast count + client-side pin fetching
+        const totalCount = await getListingCount(filters)
+
         return (
             <ListingsTermsGate>
                 <div className="bg-gray-50 min-h-screen pt-24 pb-16">
                     <div className="px-4 sm:px-6">
-                        <ListingSearch initialFilters={filterParams} />
-                        <MapView filterParams={filterParams} totalCount={0} />
+                        <ListingSearch initialFilters={filterParams} totalCount={totalCount} />
+                        <MapViewLoader filterParams={filterParams} />
                         <ListingDisclaimer lastUpdated={new Date().toLocaleDateString('en-CA')} />
                     </div>
                 </div>
@@ -73,11 +74,11 @@ export default async function ListingsPage({
     return (
         <ListingsTermsGate>
         <div className="bg-gray-50 min-h-screen pt-24 pb-16">
-            <div className="px-4 sm:px-6 lg:px-8">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <ListingSearch initialFilters={filterParams} resultCount={listings.length} totalCount={totalCount} />
 
                 {listings.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-[1400px] mx-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {listings.map(listing => (
                             <ListingCard key={listing.id} listing={listing} />
                         ))}

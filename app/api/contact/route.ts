@@ -1,73 +1,100 @@
 import { Resend } from 'resend'
-import { contactSchema } from '@/lib/contact-schema'
+import { headers } from 'next/headers'
+import { contactSchema, escapeHtml } from '@/lib/contact-utils'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
-const CONTACT_EMAIL = process.env.REALTOR_CONTACT_EMAIL || 'abdulbasharmalrealtor@gmail.com'
 
-// Simple rate limiter: max 5 requests per IP per minute
-const rateMap = new Map<string, { count: number; resetAt: number }>()
-const RATE_LIMIT = 5
-const RATE_WINDOW_MS = 60_000
+// Simple in-memory rate limiter: max 5 submissions per IP per 15 minutes
+const RATE_LIMIT_MAX = 5
+const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000
+const MAX_TRACKED_IPS = 10_000
+const ipHits = new Map<string, number[]>()
+let cleanupCounter = 0
+const CLEANUP_INTERVAL = 100 // sweep stale entries every N requests
+
+/** Remove expired entries. Safe to call during iteration: .set() on existing keys
+ *  does not add new entries, and .delete() removes the current key. */
+function sweepStaleEntries(): void {
+    const now = Date.now()
+    for (const [ip, hits] of ipHits) {
+        const active = hits.filter(t => now - t < RATE_LIMIT_WINDOW_MS)
+        if (active.length === 0) {
+            ipHits.delete(ip)
+        } else {
+            ipHits.set(ip, active)
+        }
+    }
+}
 
 function isRateLimited(ip: string): boolean {
     const now = Date.now()
 
-    // Evict expired entries periodically (when map gets large)
-    if (rateMap.size > 1000) {
-        for (const [key, val] of rateMap) {
-            if (now > val.resetAt) rateMap.delete(key)
-        }
+    // Periodically sweep stale entries to prevent unbounded growth
+    if (++cleanupCounter >= CLEANUP_INTERVAL) {
+        cleanupCounter = 0
+        sweepStaleEntries()
     }
 
-    const entry = rateMap.get(ip)
-    if (!entry || now > entry.resetAt) {
-        rateMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW_MS })
-        return false
-    }
-    entry.count++
-    return entry.count > RATE_LIMIT
-}
+    const hits = (ipHits.get(ip) || []).filter(t => now - t < RATE_LIMIT_WINDOW_MS)
 
-// HTML-escape user input to prevent injection in email templates
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;')
+    if (hits.length === 0) {
+        ipHits.delete(ip)
+    }
+
+    // Safety valve: evict oldest entry if map grows too large
+    if (ipHits.size >= MAX_TRACKED_IPS) {
+        const firstKey = ipHits.keys().next().value
+        if (firstKey) ipHits.delete(firstKey)
+    }
+
+    if (hits.length >= RATE_LIMIT_MAX) return true
+    hits.push(now)
+    ipHits.set(ip, hits)
+    return false
 }
 
 export async function POST(request: Request) {
     try {
-        // Rate limiting
-        const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
+        const headersList = await headers()
+        const ip = headersList.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
+
         if (isRateLimited(ip)) {
-            return Response.json({ success: false, error: 'Too many requests. Please try again later.' }, { status: 429 })
+            return Response.json(
+                { success: false, error: 'Too many requests. Please try again later.' },
+                { status: 429 }
+            )
         }
 
-        // Server-side validation
         const body = await request.json()
         const result = contactSchema.safeParse(body)
+
         if (!result.success) {
-            return Response.json({ success: false, error: 'Invalid form data', details: result.error.flatten() }, { status: 400 })
+            return Response.json(
+                { success: false, error: 'Invalid form data', details: result.error.flatten().fieldErrors },
+                { status: 400 }
+            )
         }
 
         const { firstName, lastName, email, phone, message, intent, language, listingAddress } = result.data
 
-        // Escape all user values for HTML email
-        const safeFirstName = esc(firstName)
-        const safeLastName = esc(lastName)
-        const safeEmail = esc(email)
-        const safePhone = phone ? esc(phone) : ''
-        const safeMessage = esc(message)
-        const safeIntent = intent ? esc(intent) : ''
-        const safeLanguage = language ? esc(language) : ''
-        const safeListingAddress = listingAddress ? esc(listingAddress) : ''
+        const recipient = process.env.CONTACT_FORM_RECIPIENT
+        if (!recipient) {
+            console.error('CONTACT_FORM_RECIPIENT env var is not configured')
+            return Response.json({ success: false, error: 'Contact form is not configured' }, { status: 500 })
+        }
+
+        const safeFirstName = escapeHtml(firstName)
+        const safeLastName = escapeHtml(lastName)
+        const safeEmail = escapeHtml(email)
+        const safePhone = phone ? escapeHtml(phone) : ''
+        const safeMessage = escapeHtml(message)
+        const safeIntent = intent ? escapeHtml(intent) : ''
+        const safeLanguage = language ? escapeHtml(language) : ''
+        const safeListingAddress = listingAddress ? escapeHtml(listingAddress) : ''
 
         const { error } = await resend.emails.send({
             from: 'Abdul Basharmal <no-reply@abdulsellshomes.com>',
-            to: CONTACT_EMAIL,
+            to: recipient,
             replyTo: email,
             subject: `New ${safeIntent || 'Contact'} Inquiry from ${safeFirstName} ${safeLastName}`,
             html: `
@@ -162,7 +189,7 @@ ${safeListingAddress ? `<tr>
 <!-- Reply CTA -->
 <tr>
 <td style="padding:0 40px 36px;" align="center">
-<a href="mailto:${safeEmail}" style="display:inline-block;background-color:#1a1a1a;color:#ffffff;font-size:13px;font-family:Arial,Helvetica,sans-serif;letter-spacing:2px;text-decoration:none;padding:14px 36px;border-radius:2px;">REPLY TO ${esc(firstName.toUpperCase())}</a>
+<a href="mailto:${safeEmail}" style="display:inline-block;background-color:#1a1a1a;color:#ffffff;font-size:13px;font-family:Arial,Helvetica,sans-serif;letter-spacing:2px;text-decoration:none;padding:14px 36px;border-radius:2px;">REPLY TO ${safeFirstName.toUpperCase()}</a>
 </td>
 </tr>
 
