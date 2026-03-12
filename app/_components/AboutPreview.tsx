@@ -10,7 +10,7 @@ export function AboutPreview() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20 items-center">
                     {/* Image Side */}
                     <AnimatedSection className="relative aspect-[3/4] md:aspect-auto w-full order-2 md:order-1 flex items-center justify-center">
-                        <div className="relative w-[280px] h-[370px] md:w-[320px] md:h-[420px] lg:w-[360px] lg:h-[470px]">
+                        <div className="relative w-[280px] h-[370px] md:w-[400px] md:h-[530px] lg:w-[480px] lg:h-[630px]">
                             <Image
                                 src="/images/gretta-meet.png"
                                 alt="Gretta Hughes - Real Estate Professional"
