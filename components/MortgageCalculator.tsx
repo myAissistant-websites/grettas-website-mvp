@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { calculatePayment } from '@/lib/mortgage'
 
@@ -21,28 +21,27 @@ export function MortgageCalculator() {
     const [rate, setRate] = useState('4.99')
     const [amort, setAmort] = useState(25)
     const [freq, setFreq] = useState<string>('Monthly')
-    const [payment, setPayment] = useState(0)
-
     const price = parseInput(priceInput)
     const dp = parseInput(dpInput)
     const dpPercent = price > 0 ? (dp / price) * 100 : 0
     const needsInsurance = dpPercent < 20 && price < 1500000 && price > 0
 
-    useEffect(() => {
+    const payment = useMemo(() => {
         const parsedRate = parseFloat(rate) || 0
-        setPayment(calculatePayment({
+        return calculatePayment({
             price,
             downPayment: dp,
             rate: parsedRate,
             amortizationYears: amort,
             frequency: freq,
-        }))
+        })
     }, [price, dp, rate, amort, freq])
 
     const formatCurrency = (n: number) =>
         new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 2 }).format(n)
 
-    const inputClass = "w-full border border-brand-border px-4 py-3 bg-brand-bg focus:outline-none focus:border-brand-accent transition-colors text-brand-text rounded-sm"
+    const inputClass =
+        'w-full border border-brand-border px-4 py-3 bg-brand-bg focus:outline-none focus:border-brand-accent transition-colors text-brand-text rounded-sm'
 
     return (
         <div className="bg-white border border-brand-border shadow-xl rounded-sm overflow-hidden">
@@ -52,25 +51,45 @@ export function MortgageCalculator() {
                     {/* Purchase Price & Down Payment side by side */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                         <div>
-                            <label htmlFor="price" className="block text-xs font-semibold uppercase tracking-wider text-brand-text mb-1.5">
+                            <label
+                                htmlFor="price"
+                                className="block text-xs font-semibold uppercase tracking-wider text-brand-text mb-1.5"
+                            >
                                 Purchase Price
                             </label>
                             <div className="relative">
-                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-text-muted">$</span>
-                                <input id="price" type="text" inputMode="numeric" value={priceInput}
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-text-muted">
+                                    $
+                                </span>
+                                <input
+                                    id="price"
+                                    type="text"
+                                    inputMode="numeric"
+                                    value={priceInput}
                                     onChange={(e) => setPriceInput(formatInput(e.target.value))}
-                                    className={`${inputClass} pl-8`} />
+                                    className={`${inputClass} pl-8`}
+                                />
                             </div>
                         </div>
                         <div>
-                            <label htmlFor="dp" className="block text-xs font-semibold uppercase tracking-wider text-brand-text mb-1.5">
+                            <label
+                                htmlFor="dp"
+                                className="block text-xs font-semibold uppercase tracking-wider text-brand-text mb-1.5"
+                            >
                                 Down Payment
                             </label>
                             <div className="relative">
-                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-text-muted">$</span>
-                                <input id="dp" type="text" inputMode="numeric" value={dpInput}
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-text-muted">
+                                    $
+                                </span>
+                                <input
+                                    id="dp"
+                                    type="text"
+                                    inputMode="numeric"
+                                    value={dpInput}
                                     onChange={(e) => setDpInput(formatInput(e.target.value))}
-                                    className={`${inputClass} pl-8`} />
+                                    className={`${inputClass} pl-8`}
+                                />
                             </div>
                             <p className="text-xs text-brand-text-muted mt-1 font-light">
                                 {dpPercent.toFixed(0)}% of purchase price
@@ -82,23 +101,43 @@ export function MortgageCalculator() {
                     {/* Rate & Amortization */}
                     <div className="grid grid-cols-2 gap-5">
                         <div>
-                            <label htmlFor="rate" className="block text-xs font-semibold uppercase tracking-wider text-brand-text mb-1.5">
+                            <label
+                                htmlFor="rate"
+                                className="block text-xs font-semibold uppercase tracking-wider text-brand-text mb-1.5"
+                            >
                                 Interest Rate
                             </label>
                             <div className="relative">
-                                <input id="rate" type="text" inputMode="decimal" value={rate}
+                                <input
+                                    id="rate"
+                                    type="text"
+                                    inputMode="decimal"
+                                    value={rate}
                                     onChange={(e) => setRate(e.target.value.replace(/[^0-9.]/g, ''))}
-                                    className={inputClass} />
-                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-brand-text-muted">%</span>
+                                    className={inputClass}
+                                />
+                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-brand-text-muted">
+                                    %
+                                </span>
                             </div>
                         </div>
                         <div>
-                            <label htmlFor="amort" className="block text-xs font-semibold uppercase tracking-wider text-brand-text mb-1.5">
+                            <label
+                                htmlFor="amort"
+                                className="block text-xs font-semibold uppercase tracking-wider text-brand-text mb-1.5"
+                            >
                                 Amortization
                             </label>
-                            <select id="amort" value={amort} onChange={(e) => setAmort(Number(e.target.value))} className={inputClass}>
-                                {[10, 15, 20, 25, 30].map(y => (
-                                    <option key={y} value={y}>{y} Years</option>
+                            <select
+                                id="amort"
+                                value={amort}
+                                onChange={(e) => setAmort(Number(e.target.value))}
+                                className={`${inputClass} appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2012%2012%22%3E%3Cpath%20fill%3D%22%236B6B6B%22%20d%3D%22M2%204l4%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_1rem_center]`}
+                            >
+                                {[10, 15, 20, 25, 30].map((y) => (
+                                    <option key={y} value={y}>
+                                        {y} Years
+                                    </option>
                                 ))}
                             </select>
                         </div>
@@ -106,14 +145,20 @@ export function MortgageCalculator() {
 
                     {/* Payment Frequency — pill selector */}
                     <div>
-                        <span className="block text-xs font-semibold uppercase tracking-wider text-brand-text mb-2">Payment Frequency</span>
+                        <span className="block text-xs font-semibold uppercase tracking-wider text-brand-text mb-2">
+                            Payment Frequency
+                        </span>
                         <div className="flex flex-wrap gap-2">
-                            {frequencies.map(f => (
-                                <button key={f} onClick={() => setFreq(f)}
-                                    className={`px-4 py-2 text-xs font-medium uppercase tracking-wider rounded-sm transition-colors ${freq === f
-                                        ? 'bg-brand-bg-dark text-white'
-                                        : 'bg-brand-bg text-brand-text-muted border border-brand-border hover:border-brand-accent/40'
-                                    }`}>
+                            {frequencies.map((f) => (
+                                <button
+                                    key={f}
+                                    onClick={() => setFreq(f)}
+                                    className={`px-4 py-2 text-xs font-medium uppercase tracking-wider rounded-sm transition-colors ${
+                                        freq === f
+                                            ? 'bg-brand-accent text-white'
+                                            : 'bg-brand-bg text-brand-text-muted border border-brand-border hover:border-brand-accent/40'
+                                    }`}
+                                >
                                     {f}
                                 </button>
                             ))}
@@ -134,12 +179,16 @@ export function MortgageCalculator() {
                     </p>
 
                     <div className="w-full flex flex-col gap-3">
-                        <Link href="/contact"
-                            className="block text-center bg-brand-accent hover:bg-brand-accent-light text-white font-medium px-6 py-4 uppercase tracking-wide text-xs transition-colors">
-                            Talk to Abdul About This →
+                        <Link
+                            href="/contact"
+                            className="block text-center bg-brand-accent hover:bg-brand-accent-light text-white font-medium px-6 py-4 uppercase tracking-wide text-xs transition-colors"
+                        >
+                            Talk to Chris About This →
                         </Link>
-                        <Link href="/listings"
-                            className="block text-center border border-brand-border/30 hover:bg-brand-border/10 text-white font-medium px-6 py-4 uppercase tracking-wide text-xs transition-colors">
+                        <Link
+                            href="/listings"
+                            className="block text-center border border-brand-border/30 hover:bg-brand-border/10 text-white font-medium px-6 py-4 uppercase tracking-wide text-xs transition-colors"
+                        >
                             Search Listings in This Budget →
                         </Link>
                     </div>
@@ -147,7 +196,8 @@ export function MortgageCalculator() {
             </div>
 
             <p className="text-xs text-brand-text-muted px-8 py-4 text-center font-light">
-                For estimation purposes only. Uses standard Canadian semi-annual compounding. Consult a mortgage broker for accurate qualification.
+                For estimation purposes only. Uses standard Canadian semi-annual compounding. Consult a mortgage broker
+                for accurate qualification.
             </p>
         </div>
     )

@@ -6,7 +6,6 @@ import {
     normalizeStatus,
     parseFilterParams,
     toMapPin,
-    type ListingFilters,
     type Listing,
 } from '../listings'
 
@@ -151,9 +150,9 @@ describe('parseFilterParams', () => {
 describe('buildODataFilter', () => {
     it('includes default service area cities when no city specified', () => {
         const result = buildODataFilter({ transactionType: 'sale' })
+        expect(result).toContain("City eq 'Cambridge'")
         expect(result).toContain("City eq 'Kitchener'")
         expect(result).toContain("City eq 'Waterloo'")
-        expect(result).toContain("City eq 'Toronto'")
     })
 
     it('uses specified city instead of default service area', () => {

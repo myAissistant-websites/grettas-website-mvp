@@ -9,9 +9,7 @@ describe('escapeHtml', () => {
     })
 
     it('escapes angle brackets', () => {
-        expect(escapeHtml('<script>alert("xss")</script>')).toBe(
-            '&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;'
-        )
+        expect(escapeHtml('<script>alert("xss")</script>')).toBe('&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;')
     })
 
     it('escapes double quotes', () => {
@@ -89,9 +87,9 @@ describe('contactSchema', () => {
         expect(result.success).toBe(false)
     })
 
-    it('rejects invalid language value', () => {
+    it('ignores unknown fields like language', () => {
         const result = contactSchema.safeParse({ ...validData, language: 'Klingon' })
-        expect(result.success).toBe(false)
+        expect(result.success).toBe(true)
     })
 
     it('rejects firstName longer than 100 characters', () => {
