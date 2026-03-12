@@ -2,7 +2,8 @@ import { Resend } from 'resend'
 import { headers } from 'next/headers'
 import { contactSchema, escapeHtml } from '@/lib/contact-utils'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+// Initialized inside POST handler to avoid build-time errors when key is missing
+// const resend = new Resend(process.env.RESEND_API_KEY)
 
 // Simple in-memory rate limiter: max 5 submissions per IP per 15 minutes
 const RATE_LIMIT_MAX = 5
@@ -76,6 +77,13 @@ export async function POST(request: Request) {
         }
 
         const { firstName, lastName, email, phone, message, intent, listingAddress } = result.data
+
+        const resendApiKey = process.env.RESEND_API_KEY
+        if (!resendApiKey) {
+            console.error('RESEND_API_KEY is not configured')
+            return Response.json({ success: false, error: 'Email service is not configured' }, { status: 500 })
+        }
+        const resend = new Resend(resendApiKey)
 
         const recipient = process.env.CONTACT_FORM_RECIPIENT
         if (!recipient) {
