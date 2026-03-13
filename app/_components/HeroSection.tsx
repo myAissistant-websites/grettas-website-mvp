@@ -5,10 +5,24 @@ import { AnimatedSection } from '@/components/ui/AnimatedSection'
 export function HeroSection() {
     return (
         <section className="relative w-full bg-white overflow-hidden lg:h-screen lg:min-h-[700px]">
+            {/* Desktop Image — absolutely positioned, right-aligned, bottom-anchored */}
+            <div className="hidden lg:block absolute right-0 bottom-0 w-[45%] h-[calc(100vh-40px)]">
+                <Image
+                    src="/images/gretta-hero-nobg.png"
+                    alt="Gretta Hughes - Cambridge & Waterloo Region REALTOR"
+                    fill
+                    priority
+                    sizes="45vw"
+                    className="object-contain object-right-bottom"
+                />
+                {/* Left fade */}
+                <div className="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-white to-transparent pointer-events-none"></div>
+            </div>
+
             <div className="max-w-7xl 2xl:max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-12 2xl:px-20 w-full h-full">
                 <div className="flex flex-col lg:flex-row items-end h-full pt-[90px] lg:pt-[124px]">
                     {/* Main Content Area */}
-                    <div className="w-full lg:w-[55%] flex flex-col z-10 lg:pr-0 pt-8 lg:pt-0 lg:justify-center lg:self-stretch">
+                    <div className="w-full lg:w-[55%] flex flex-col z-10 pt-8 lg:pt-0 lg:justify-center lg:self-stretch">
                         {/* Mobile: side-by-side heading + image */}
                         <div className="flex flex-row items-stretch lg:block w-full mb-6 lg:mb-0">
                             {/* Text */}
@@ -69,22 +83,6 @@ export function HeroSection() {
                                 <span className="text-brand-accent">✓</span> Cambridge Community Roots · Experienced. Professional.
                             </span>
                         </div>
-                    </div>
-
-                    {/* Desktop Image — large, bottom-aligned, fills viewport */}
-                    <div className="hidden lg:flex w-[45%] justify-end items-end relative self-end h-[calc(100vh-40px)]">
-                        <div className="relative w-full max-w-[750px] 2xl:max-w-[850px] h-full">
-                            <Image
-                                src="/images/gretta-hero-nobg.png"
-                                alt="Gretta Hughes - Cambridge & Waterloo Region REALTOR"
-                                fill
-                                priority
-                                sizes="50vw"
-                                className="object-contain object-bottom"
-                            />
-                        </div>
-                        {/* Left fade */}
-                        <div className="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-white to-transparent pointer-events-none"></div>
                     </div>
                 </div>
             </div>
