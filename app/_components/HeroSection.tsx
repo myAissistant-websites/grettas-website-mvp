@@ -5,8 +5,8 @@ import { AnimatedSection } from '@/components/ui/AnimatedSection'
 export function HeroSection() {
     return (
         <section className="relative w-full bg-white overflow-hidden lg:h-screen lg:min-h-[700px]">
-            {/* Desktop Image — absolutely positioned, LEFT-aligned, bottom-anchored */}
-            <div className="hidden lg:block absolute left-0 bottom-0 w-[42%] h-[calc(100vh-40px)]">
+            {/* Desktop Image — absolutely positioned, right side, left-aligned within container */}
+            <div className="hidden lg:block absolute right-0 bottom-0 w-[42%] h-[calc(100vh-40px)]">
                 <Image
                     src="/images/gretta-hero-nobg.png"
                     alt="Gretta Hughes - Cambridge & Waterloo Region REALTOR"
@@ -15,14 +15,14 @@ export function HeroSection() {
                     sizes="42vw"
                     className="object-contain object-left-bottom"
                 />
-                {/* Right fade for smooth transition to text */}
-                <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-white to-transparent pointer-events-none"></div>
+                {/* Left fade for smooth transition from text */}
+                <div className="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-white to-transparent pointer-events-none"></div>
             </div>
 
             <div className="max-w-7xl 2xl:max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-12 2xl:px-20 w-full h-full">
                 <div className="flex flex-col lg:flex-row items-end h-full pt-[90px] lg:pt-[124px]">
                     {/* Main Content Area — pushed to the right */}
-                    <div className="w-full lg:w-[55%] lg:ml-auto flex flex-col z-10 pt-8 lg:pt-0 lg:justify-center lg:self-stretch">
+                    <div className="w-full lg:w-[55%] flex flex-col z-10 pt-8 lg:pt-0 lg:justify-center lg:self-stretch">
                         {/* Mobile: side-by-side heading + image */}
                         <div className="flex flex-row items-stretch lg:block w-full mb-6 lg:mb-0">
                             {/* Text */}
