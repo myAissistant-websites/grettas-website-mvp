@@ -1,62 +1,20 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/db'
-import { SERVICE_AREA_BBOX } from '@/lib/constants'
+import { NextResponse } from 'next/server'
+import { getAllMapPins } from '@/lib/listings'
 
+// ISR: regenerate this response every 5 minutes.
+// On Vercel, the result is cached at the CDN edge — subsequent requests
+// within the revalidate window are served instantly from the edge cache.
+// After expiry, the next request triggers a background regeneration
+// (stale-while-revalidate) so users never wait for the DDF fetch.
 export const revalidate = 300
+export const dynamic = 'force-static'
 
-/**
- * GET /api/listings/map-pins
- *
- * Legacy-compatible endpoint. Returns all active pins (large default bbox).
- * For the new bbox-based endpoint, use GET /api/listings?bbox=...
- */
-export async function GET(_request: NextRequest) {
-    const PAGE_SIZE = 1000
-    const MAX_RESULTS = 5000
-    const rpcParams = {
-        bbox_west: SERVICE_AREA_BBOX.west,
-        bbox_south: SERVICE_AREA_BBOX.south,
-        bbox_east: SERVICE_AREA_BBOX.east,
-        bbox_north: SERVICE_AREA_BBOX.north,
-        filter_status: 'Active',
-        max_results: MAX_RESULTS,
-    }
-
+export async function GET() {
     try {
-        const allRows: Record<string, unknown>[] = []
-        let from = 0
-
-        while (from < MAX_RESULTS) {
-            const to = Math.min(from + PAGE_SIZE - 1, MAX_RESULTS - 1)
-            const { data, error } = await supabase.rpc('get_listings_in_bbox', rpcParams).range(from, to)
-
-            if (error) throw error
-
-            const rows = data || []
-            allRows.push(...rows)
-
-            if (rows.length < PAGE_SIZE) break
-            from += PAGE_SIZE
-        }
-
-        // Deduplicate in case pagination returned overlapping rows
-        const seen = new Set<string>()
-        const uniqueRows = allRows.filter((row) => {
-            const id = row.id as string
-            if (seen.has(id)) return false
-            seen.add(id)
-            return true
-        })
-
-        return NextResponse.json({
-            pins: uniqueRows,
-            totalCount: uniqueRows.length,
-        })
-    } catch (error) {
-        console.error('Map pins query error:', error)
-        // Fallback to DDF direct fetch if DB is not available
-        const { getAllMapPins } = await import('@/lib/listings')
         const { pins, totalCount } = await getAllMapPins()
         return NextResponse.json({ pins, totalCount })
+    } catch (error) {
+        console.error('Map pins query error:', error)
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 }

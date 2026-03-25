@@ -12,11 +12,18 @@ function makePin(overrides: Partial<MapPin> = {}): MapPin {
         baths: 2,
         sqft: 1500,
         address: '123 Main St, Kitchener',
+        streetNumber: '123',
+        streetName: 'Main St',
+        unitNumber: null,
+        city: 'Kitchener',
+        province: 'ON',
         photo: 'https://example.com/photo.jpg',
         propertyType: 'House',
         isRental: false,
+        rentFrequency: null,
         status: 'Active',
         listDate: '2025-03-01',
+        realtorCaUrl: 'https://www.realtor.ca/real-estate/pin-1',
         ...overrides,
     }
 }

@@ -1,5 +1,5 @@
 import { Metadata } from 'next'
-import { getListings, getListingCount, ListingFilters } from '@/lib/listings'
+import { getListings, ListingFilters } from '@/lib/listings'
 import { ListingSearch } from './_components/ListingSearch'
 import { ListingCard } from './_components/ListingCard'
 import { ListingDisclaimer } from './_components/ListingDisclaimer'
@@ -52,14 +52,12 @@ export default async function ListingsPage({
     })
 
     if (view === 'map') {
-        // Map view: fast count + client-side pin fetching
-        const totalCount = await getListingCount(filters)
-
+        // Map view: all filtering is client-side from ISR-cached pins — no server fetch needed
         return (
             <ListingsTermsGate>
                 <div className="bg-gray-50 min-h-screen pt-24 pb-16">
                     <div className="px-4 sm:px-6">
-                        <ListingSearch initialFilters={filterParams} totalCount={totalCount} />
+                        <ListingSearch initialFilters={filterParams} />
                         <MapViewLoader filterParams={filterParams} />
                         <ListingDisclaimer lastUpdated={new Date().toLocaleDateString('en-CA')} />
                     </div>

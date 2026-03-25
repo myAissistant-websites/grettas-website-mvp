@@ -6,10 +6,23 @@ const DDF_CLIENT_SECRET = process.env.DDF_CLIENT_SECRET || ''
 // ─── Token Cache ─────────────────────────────────────────────────────────
 let cachedToken: string | null = null
 let tokenExpiry = 0
+let tokenPromise: Promise<string> | null = null
 
 async function getDdfToken(): Promise<string> {
     if (cachedToken && Date.now() < tokenExpiry) return cachedToken
+    if (tokenPromise) return tokenPromise
 
+    tokenPromise = (async () => {
+        try {
+            return await _fetchDdfToken()
+        } finally {
+            tokenPromise = null
+        }
+    })()
+    return tokenPromise
+}
+
+async function _fetchDdfToken(): Promise<string> {
     const res = await fetch(DDF_TOKEN_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -37,18 +50,25 @@ async function getDdfToken(): Promise<string> {
 
 export interface MapPin {
     id: string
-    lat: number
-    lng: number
+    lat: number | null
+    lng: number | null
     price: number
     beds: number
     baths: number
     sqft: number | null
     address: string
+    streetNumber: string
+    streetName: string
+    unitNumber: string | null
+    city: string
+    province: string
     photo: string
     propertyType: string
     isRental: boolean
+    rentFrequency: string | null
     status: 'Active' | 'Sold' | 'Pending'
     listDate: string
+    realtorCaUrl: string
 }
 
 export interface Room {
@@ -147,6 +167,7 @@ export interface ListingFilters {
     yearBuilt?: number
     limit?: number
     offset?: number
+    query?: string
     sortField?: 'listingPrice' | 'listingDate'
     sortDirection?: 'asc' | 'desc'
 }
@@ -223,6 +244,13 @@ export function buildODataFilter(filters: ListingFilters): string {
         }
     }
 
+    if (filters.query) {
+        const q = odataString(filters.query)
+        parts.push(
+            `(contains(UnparsedAddress,'${q}') or contains(City,'${q}') or contains(ListingId,'${q}') or contains(PublicRemarks,'${q}'))`
+        )
+    }
+
     if (filters.city) {
         parts.push(`City eq '${odataString(filters.city)}'`)
     } else {
@@ -293,7 +321,7 @@ export async function getListings(filters: ListingFilters = {}): Promise<{ listi
     }
 
     const data = await res.json()
-    const listings = (data.value || []).map(normalizeDdfListing)
+    const listings = deduplicateListings((data.value || []).map(normalizeDdfListing))
     const totalCount = data['@odata.count'] ?? listings.length
 
     // Post-fetch sort by price since rentals use TotalActualRent, not ListPrice
@@ -303,6 +331,20 @@ export async function getListings(filters: ListingFilters = {}): Promise<{ listi
     }
 
     return { listings, totalCount }
+}
+
+// ─── Deduplicate listings by address+price ──────────────────────────────
+function deduplicateListings(listings: Listing[]): Listing[] {
+    const seen = new Set<string>()
+    const result: Listing[] = []
+    for (const l of listings) {
+        const key =
+            `${l.address.streetNumber}|${l.address.streetName}|${l.address.unitNumber || ''}|${l.address.city}|${l.price}`.toLowerCase()
+        if (seen.has(key)) continue
+        seen.add(key)
+        result.push(l)
+    }
+    return result
 }
 
 // ─── Fetch All Listings (batched) ────────────────────────────────────────
@@ -414,8 +456,8 @@ async function fetchRemainingBatches(
     })
 
     const batches = await Promise.all(batchPromises)
-    const allListings = [firstBatch, ...batches].flat()
-    return { listings: allListings, totalCount }
+    const allListings = deduplicateListings([firstBatch, ...batches].flat())
+    return { listings: allListings, totalCount: allListings.length }
 }
 
 // ─── Fetch Single Listing ────────────────────────────────────────────────
@@ -654,7 +696,9 @@ function normalizeDdfListing(raw: any): Listing {
         fencing: ddfStr(raw.Fencing),
         // Required
         realtorCaUrl: raw.ListingURL
-            ? `https://${raw.ListingURL}`
+            ? raw.ListingURL.startsWith('http')
+                ? raw.ListingURL
+                : `https://${raw.ListingURL}`
             : `https://www.realtor.ca/real-estate/${raw.ListingKey}`,
         listingBrokerage: raw.ListOfficeName || '',
     }
@@ -683,11 +727,18 @@ export function toMapPin(listing: Listing): MapPin | null {
         baths: listing.baths,
         sqft: listing.sqft,
         address: listing.address.full,
+        streetNumber: listing.address.streetNumber,
+        streetName: listing.address.streetName,
+        unitNumber: listing.address.unitNumber,
+        city: listing.address.city,
+        province: listing.address.province,
         photo: listing.photos[0] || '',
         propertyType: listing.propertyType,
         isRental: listing.isRental,
+        rentFrequency: listing.rentFrequency,
         status: listing.status,
         listDate: listing.listDate,
+        realtorCaUrl: listing.realtorCaUrl,
     }
 }
 
@@ -714,23 +765,26 @@ const MAP_PIN_SELECT = [
     'StructureType',
     'PropertySubType',
     'StandardStatus',
+    'LeaseAmountFrequency',
     'OriginalEntryTimestamp',
+    'ListingURL',
 ].join(',')
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function normalizeDdfToPin(raw: any): MapPin | null {
     const lat = raw.Latitude
     const lng = raw.Longitude
-    if (!lat || !lng) return null
+    if (lat == null || lng == null) return null
 
-    // Exclude outliers outside the KW / Southern Ontario service area
-    if (lat < 43.0 || lat > 44.0 || lng < -81.0 || lng > -79.5) return null
+    // Exclude outliers outside Southern Ontario service area (KW to Toronto)
+    if (lat < 43.0 || lat > 44.5 || lng < -81.0 || lng > -79.0) return null
 
     const streetNum = raw.StreetNumber || ''
     const streetName = raw.StreetName || ''
     const streetSuffix = raw.StreetSuffix || ''
-    const unit = raw.UnitNumber || ''
+    const unit = raw.UnitNumber || null
     const city = raw.City || ''
+    const province = raw.StateOrProvince || 'ON'
     const unitPart = unit ? ` Unit ${unit}` : ''
     const address = `${streetNum} ${streetName} ${streetSuffix}${unitPart}, ${city}`.trim()
 
@@ -753,14 +807,46 @@ export function normalizeDdfToPin(raw: any): MapPin | null {
         baths: raw.BathroomsTotalInteger || 0,
         sqft: raw.LivingArea || raw.BuildingAreaTotal || null,
         address,
+        streetNumber: streetNum,
+        streetName: `${streetName} ${streetSuffix}`.trim(),
+        unitNumber: unit,
+        city,
+        province,
         photo: photos[0]?.MediaURL || '',
         propertyType:
             (Array.isArray(raw.StructureType) && raw.StructureType[0]) || raw.PropertySubType || 'Residential',
         isRental: !raw.ListPrice && !!raw.TotalActualRent,
+        rentFrequency: raw.LeaseAmountFrequency || null,
         status,
         listDate: raw.OriginalEntryTimestamp || '',
+        realtorCaUrl: raw.ListingURL
+            ? raw.ListingURL.startsWith('http')
+                ? raw.ListingURL
+                : `https://${raw.ListingURL}`
+            : `https://www.realtor.ca/real-estate/${raw.ListingKey}`,
     }
 }
+
+// ─── Deduplicate pins by ID and address+price ────────────────────────────
+function deduplicatePins(pins: MapPin[]): MapPin[] {
+    const seenId = new Set<string>()
+    const seenAddr = new Set<string>()
+    const result: MapPin[] = []
+    for (const pin of pins) {
+        if (seenId.has(pin.id)) continue
+        const addrKey = `${pin.address}|${pin.price}`
+        if (seenAddr.has(addrKey)) continue
+        seenId.add(pin.id)
+        seenAddr.add(addrKey)
+        result.push(pin)
+    }
+    return result
+}
+
+// ─── In-memory pin cache (works in dev + prod, survives across requests) ──
+let _pinCache: { pins: MapPin[]; totalCount: number; ts: number } | null = null
+let _pinCachePromise: Promise<{ pins: MapPin[]; totalCount: number }> | null = null
+const PIN_CACHE_TTL = 5 * 60 * 1000 // 5 minutes
 
 export async function getAllMapPins(filters: ListingFilters = {}): Promise<{ pins: MapPin[]; totalCount: number }> {
     if (!DDF_CLIENT_ID) {
@@ -770,6 +856,21 @@ export async function getAllMapPins(filters: ListingFilters = {}): Promise<{ pin
         return { pins, totalCount: filtered.length }
     }
 
+    // Return cached data if fresh
+    if (_pinCache && Date.now() - _pinCache.ts < PIN_CACHE_TTL) {
+        return { pins: _pinCache.pins, totalCount: _pinCache.totalCount }
+    }
+
+    // If a fetch is already in progress, reuse it (prevents duplicate fetches)
+    if (_pinCachePromise) return _pinCachePromise
+
+    _pinCachePromise = _fetchAllPins(filters).finally(() => {
+        _pinCachePromise = null
+    })
+    return _pinCachePromise
+}
+
+async function _fetchAllPins(filters: ListingFilters): Promise<{ pins: MapPin[]; totalCount: number }> {
     const token = await getDdfToken()
     const filterStr = buildODataFilter(filters)
     const orderBy = buildODataOrderBy(filters)
@@ -812,7 +913,9 @@ export async function getAllMapPins(filters: ListingFilters = {}): Promise<{ pin
     const firstPins: MapPin[] = (firstData.value || []).map(normalizeDdfToPin).filter(Boolean)
 
     if (totalCount <= DDF_PAGE_LIMIT) {
-        return { pins: firstPins, totalCount }
+        const dedupedPins = deduplicatePins(firstPins)
+        if (dedupedPins.length > 0) _pinCache = { pins: dedupedPins, totalCount: dedupedPins.length, ts: Date.now() }
+        return { pins: dedupedPins, totalCount: dedupedPins.length }
     }
 
     // Fetch remaining pages in parallel
@@ -839,7 +942,8 @@ export async function getAllMapPins(filters: ListingFilters = {}): Promise<{ pin
     })
 
     const batches = await Promise.all(batchPromises)
-    const allPins = [firstPins, ...batches].flat()
+    const allPins = deduplicatePins([firstPins, ...batches].flat())
+    if (allPins.length > 0) _pinCache = { pins: allPins, totalCount, ts: Date.now() }
     return { pins: allPins, totalCount }
 }
 

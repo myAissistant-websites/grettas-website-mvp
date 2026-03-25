@@ -45,6 +45,7 @@ export interface MapBounds {
 
 interface ListingMapProps {
     pins: MapPin[]
+    initialBounds?: MapBounds
     onBoundsChange?: (bounds: MapBounds) => void
 }
 
@@ -216,8 +217,8 @@ function ClusterOverlay({
 function PinMarker({ pin, onClick }: { pin: MapPin; onClick: (pin: MapPin) => void }) {
     return (
         <Marker
-            latitude={pin.lat}
-            longitude={pin.lng}
+            latitude={pin.lat as number}
+            longitude={pin.lng as number}
             anchor="bottom"
             onClick={(e) => {
                 e.originalEvent.stopPropagation()
@@ -310,7 +311,7 @@ function ClusterMarker({
 
 // ─── Main Component ─────────────────────────────────────────────────────
 
-export function ListingMap({ pins, onBoundsChange }: ListingMapProps) {
+export function ListingMap({ pins, initialBounds: _initialBounds, onBoundsChange }: ListingMapProps) {
     const mapRef = useRef<MapRef>(null)
     const mapContainerRef = useRef<HTMLDivElement>(null)
     const [selectedPin, setSelectedPin] = useState<MapPin | null>(null)
@@ -327,11 +328,13 @@ export function ListingMap({ pins, onBoundsChange }: ListingMapProps) {
             radius: 60,
             maxZoom: 16,
         })
-        const points = pins.map((p) => ({
-            type: 'Feature' as const,
-            properties: { id: p.id },
-            geometry: { type: 'Point' as const, coordinates: [p.lng, p.lat] },
-        }))
+        const points = pins
+            .filter((p) => p.lat != null && p.lng != null)
+            .map((p) => ({
+                type: 'Feature' as const,
+                properties: { id: p.id },
+                geometry: { type: 'Point' as const, coordinates: [p.lng as number, p.lat as number] },
+            }))
         sc.load(points)
         return sc
     }, [pins])
@@ -474,8 +477,8 @@ export function ListingMap({ pins, onBoundsChange }: ListingMapProps) {
 
                 {selectedPin && !clusterOverlay && (
                     <Popup
-                        latitude={selectedPin.lat}
-                        longitude={selectedPin.lng}
+                        latitude={selectedPin.lat as number}
+                        longitude={selectedPin.lng as number}
                         anchor="bottom"
                         offset={[0, -35]}
                         onClose={() => setSelectedPin(null)}

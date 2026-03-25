@@ -4,29 +4,34 @@ import type { MapPin } from '@/lib/listings'
 export function filterPins(pins: MapPin[], params: Record<string, string>): MapPin[] {
     let result = pins
 
+    const q = params.q?.trim().toLowerCase()
+    if (q) {
+        result = result.filter((p) => p.address.toLowerCase().includes(q) || p.id.toLowerCase().includes(q))
+    }
+
     const tt = params.tt
-    if (tt === 'sale') result = result.filter(p => !p.isRental)
-    else if (tt === 'rent') result = result.filter(p => p.isRental)
+    if (tt === 'sale') result = result.filter((p) => !p.isRental)
+    else if (tt === 'rent') result = result.filter((p) => p.isRental)
 
     const lp = params.lp ? Number(params.lp) : NaN
     const hp = params.hp ? Number(params.hp) : NaN
-    if (Number.isFinite(lp)) result = result.filter(p => p.price >= lp)
-    if (Number.isFinite(hp)) result = result.filter(p => p.price <= hp)
+    if (Number.isFinite(lp)) result = result.filter((p) => p.price >= lp)
+    if (Number.isFinite(hp)) result = result.filter((p) => p.price <= hp)
 
     const bd = params.bd ? Number(params.bd) : NaN
-    if (Number.isFinite(bd)) result = result.filter(p => p.beds >= bd)
+    if (Number.isFinite(bd)) result = result.filter((p) => p.beds >= bd)
 
     const ba = params.ba ? Number(params.ba) : NaN
-    if (Number.isFinite(ba)) result = result.filter(p => p.baths >= ba)
+    if (Number.isFinite(ba)) result = result.filter((p) => p.baths >= ba)
 
     const pt = params.pt
-    if (pt) result = result.filter(p => p.propertyType === pt)
+    if (pt) result = result.filter((p) => p.propertyType === pt)
 
     // Sort
     const sortField = params.sortField
     const sortDir = params.sortDirection || 'desc'
     if (sortField === 'listingPrice') {
-        result = [...result].sort((a, b) => sortDir === 'asc' ? a.price - b.price : b.price - a.price)
+        result = [...result].sort((a, b) => (sortDir === 'asc' ? a.price - b.price : b.price - a.price))
     } else {
         // Default: newest first (by listDate)
         result = [...result].sort((a, b) => {

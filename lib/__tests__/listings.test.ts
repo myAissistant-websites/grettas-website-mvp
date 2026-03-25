@@ -286,7 +286,7 @@ describe('normalizeDdfToPin', () => {
         expect(normalizeDdfToPin({ ...validDdfRecord, Latitude: 42.0 })).toBeNull()
         expect(normalizeDdfToPin({ ...validDdfRecord, Latitude: 45.0 })).toBeNull()
         expect(normalizeDdfToPin({ ...validDdfRecord, Longitude: -82.0 })).toBeNull()
-        expect(normalizeDdfToPin({ ...validDdfRecord, Longitude: -79.0 })).toBeNull()
+        expect(normalizeDdfToPin({ ...validDdfRecord, Longitude: -78.0 })).toBeNull()
     })
 
     it('detects rental by TotalActualRent with no ListPrice', () => {
