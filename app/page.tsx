@@ -52,12 +52,22 @@ export default function Home() {
 
             <section className="bg-white py-24 md:py-32 border-t border-brand-border/30">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    {/* Heading - always first */}
+                    <div className="text-left mb-12 lg:mb-0">
+                        <h2 className="font-display text-4xl md:text-5xl text-brand-text mb-6 text-balance">
+                            Let&apos;s Chat
+                        </h2>
+                        <p className="text-brand-text-muted text-base leading-relaxed font-light max-w-lg lg:hidden">
+                            Real estate decisions are big. You shouldn&apos;t have to figure them out alone, and you
+                            shouldn&apos;t feel pressured into anything. Reach out, we&apos;ll talk through what
+                            you&apos;re thinking, no strings attached.
+                        </p>
+                    </div>
+
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
+                        {/* Left column: description (desktop only) + contact card */}
                         <div className="flex flex-col text-left order-2 lg:order-1">
-                            <h2 className="font-display text-4xl md:text-5xl text-brand-text mb-6 text-balance">
-                                Let&apos;s Chat
-                            </h2>
-                            <p className="text-brand-text-muted text-base leading-relaxed font-light mb-12 max-w-lg">
+                            <p className="text-brand-text-muted text-base leading-relaxed font-light mb-12 max-w-lg hidden lg:block">
                                 Real estate decisions are big. You shouldn&apos;t have to figure them out alone, and you
                                 shouldn&apos;t feel pressured into anything. Reach out, we&apos;ll talk through what
                                 you&apos;re thinking, no strings attached.
@@ -122,6 +132,7 @@ export default function Home() {
                             </div>
                         </div>
 
+                        {/* Right column: form - shows first on mobile */}
                         <div className="bg-white p-8 md:p-10 shadow-xl shadow-black/[0.04] border border-brand-border/30 lg:-mt-10 lg:mb-10 order-1 lg:order-2">
                             <h3 className="font-display text-2xl text-brand-text mb-6">Send a Message</h3>
                             <ContactForm />
