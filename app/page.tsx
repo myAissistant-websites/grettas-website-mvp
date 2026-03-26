@@ -7,7 +7,7 @@ import { NeighbourhoodGuide } from './_components/NeighbourhoodGuide'
 import { TestimonialsSection } from './_components/TestimonialsSection'
 import { ContactCTA } from './_components/ContactCTA'
 import { ContactForm } from '@/components/ContactForm'
-import { Facebook, Instagram } from 'lucide-react'
+import { Facebook, Instagram, Linkedin } from 'lucide-react'
 import { Suspense } from 'react'
 
 export default function Home() {
@@ -91,7 +91,7 @@ export default function Home() {
                                     </p>
                                     <div className="flex gap-3">
                                         <a
-                                            href="https://www.instagram.com/gretta.hughes/?hl=en"
+                                            href="https://www.instagram.com/gretta.hughes/"
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="w-10 h-10 border border-brand-border/50 flex items-center justify-center text-brand-text hover:text-brand-gold hover:border-brand-gold/40 transition-all duration-300"
@@ -107,6 +107,15 @@ export default function Home() {
                                         >
                                             <span className="sr-only">Facebook</span>
                                             <Facebook className="w-4 h-4" />
+                                        </a>
+                                        <a
+                                            href="https://www.linkedin.com/in/gretta-hughes-345374200/"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="w-10 h-10 border border-brand-border/50 flex items-center justify-center text-brand-text hover:text-brand-gold hover:border-brand-gold/40 transition-all duration-300"
+                                        >
+                                            <span className="sr-only">LinkedIn</span>
+                                            <Linkedin className="w-4 h-4" />
                                         </a>
                                     </div>
                                 </div>

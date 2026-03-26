@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import Image from 'next/image'
 import { ContactForm } from '@/components/ContactForm'
-import { Facebook, Instagram, MapPin, Phone } from 'lucide-react'
+import { Facebook, Instagram, Linkedin, MapPin, Phone } from 'lucide-react'
 
 export const metadata: Metadata = {
     title: 'Contact Gretta Hughes | RE/MAX Twin City Realty',
@@ -90,7 +90,7 @@ export default async function ContactPage({ searchParams }: { searchParams: Prom
                             </p>
                             <div className="flex gap-3">
                                 <a
-                                    href="https://www.instagram.com/gretta.hughes/?hl=en"
+                                    href="https://www.instagram.com/gretta.hughes/"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="w-10 h-10 border border-brand-border/50 flex items-center justify-center text-brand-text hover:text-brand-gold hover:border-brand-gold/30 transition-all duration-300"
@@ -106,6 +106,15 @@ export default async function ContactPage({ searchParams }: { searchParams: Prom
                                 >
                                     <span className="sr-only">Facebook</span>
                                     <Facebook className="w-4 h-4" />
+                                </a>
+                                <a
+                                    href="https://www.linkedin.com/in/gretta-hughes-345374200/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="w-10 h-10 border border-brand-border/50 flex items-center justify-center text-brand-text hover:text-brand-gold hover:border-brand-gold/30 transition-all duration-300"
+                                >
+                                    <span className="sr-only">LinkedIn</span>
+                                    <Linkedin className="w-4 h-4" />
                                 </a>
                             </div>
                         </div>

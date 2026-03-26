@@ -77,6 +77,18 @@ export function Navbar() {
         return () => window.removeEventListener('scroll', handleScroll)
     }, [isHome])
 
+    // Lock body scroll when mobile menu is open
+    useEffect(() => {
+        if (mobileMenuOpen) {
+            document.body.style.overflow = 'hidden'
+        } else {
+            document.body.style.overflow = ''
+        }
+        return () => {
+            document.body.style.overflow = ''
+        }
+    }, [mobileMenuOpen])
+
     const simpleLinks = [
         { name: 'Home', href: '/' },
         { name: 'Neighbourhoods', href: '/neighbourhoods' },
@@ -96,6 +108,7 @@ export function Navbar() {
     ]
 
     return (
+        <>
         <header
             className={`fixed top-0 w-full z-50 transition-all duration-500 ${isScrolled ? 'bg-white/95 backdrop-blur-md shadow-sm py-3 border-b border-brand-border/30' : 'bg-transparent py-5'}`}
         >
@@ -165,7 +178,7 @@ export function Navbar() {
                     </div>
 
                     {/* Mobile Menu Button */}
-                    <button className="md:hidden z-50 p-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+                    <button className="md:hidden relative z-[9998] p-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
                         {mobileMenuOpen ? (
                             <X className="w-6 h-6 text-brand-text" />
                         ) : (
@@ -175,6 +188,8 @@ export function Navbar() {
                 </div>
             </div>
 
+        </header>
+
             {/* Mobile Menu Drawer */}
             <AnimatePresence>
                 {mobileMenuOpen && (
@@ -183,9 +198,31 @@ export function Navbar() {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: '100%' }}
                         transition={{ type: 'spring', bounce: 0, duration: 0.4 }}
-                        className="fixed inset-0 bg-white z-40 md:hidden pt-24 px-8 overflow-y-auto pb-8 flex flex-col"
+                        className="fixed inset-0 bg-white z-[9997] md:hidden pt-6 px-8 overflow-y-auto pb-8 flex flex-col"
                     >
-                        <nav className="flex flex-col gap-6 text-xl font-display mt-8">
+                        <div className="flex justify-end mb-4">
+                            <button className="p-2" onClick={() => setMobileMenuOpen(false)}>
+                                <X className="w-6 h-6 text-brand-text" />
+                            </button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 mb-6">
+                            <a
+                                href="tel:519-590-3236"
+                                className="flex items-center justify-center gap-2 border border-brand-border bg-white text-brand-text px-3 py-3 font-light text-sm transition-colors"
+                                onClick={() => setMobileMenuOpen(false)}
+                            >
+                                <Phone className="w-3.5 h-3.5 text-brand-gold" />
+                                <span>Call or Text</span>
+                            </a>
+                            <Link
+                                href="/contact"
+                                className="flex items-center justify-center bg-brand-text hover:bg-brand-text/85 text-white px-3 py-3 font-medium text-xs uppercase tracking-[0.15em] transition-colors"
+                                onClick={() => setMobileMenuOpen(false)}
+                            >
+                                Let{"'"}s Talk
+                            </Link>
+                        </div>
+                        <nav className="flex flex-col gap-6 text-xl font-display">
                             <Link
                                 href="/"
                                 className="text-brand-text hover:text-brand-accent-light transition-colors"
@@ -268,26 +305,9 @@ export function Navbar() {
                             </div>
                         </nav>
 
-                        <div className="mt-auto pt-12 pb-6 border-t border-brand-border/30">
-                            <a
-                                href="tel:519-590-3236"
-                                className="flex items-center justify-center gap-2 w-full border border-brand-border bg-white text-brand-text px-6 py-4 font-light transition-colors mb-3"
-                                onClick={() => setMobileMenuOpen(false)}
-                            >
-                                <Phone className="w-4 h-4 text-brand-gold" />
-                                <span>Call or Text Me</span>
-                            </a>
-                            <Link
-                                href="/contact"
-                                className="block text-center w-full bg-brand-text hover:bg-brand-text/85 text-white px-6 py-4 font-medium text-sm uppercase tracking-[0.15em] transition-colors"
-                                onClick={() => setMobileMenuOpen(false)}
-                            >
-                                Let{"'"}s Talk
-                            </Link>
-                        </div>
                     </motion.div>
                 )}
             </AnimatePresence>
-        </header>
+        </>
     )
 }
