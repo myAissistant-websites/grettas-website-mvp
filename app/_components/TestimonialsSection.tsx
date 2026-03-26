@@ -97,7 +97,7 @@ export function TestimonialsSection() {
                 {/* Read All Reviews Link */}
                 <AnimatedSection className="text-center mt-12 md:mt-16">
                     <a
-                        href="https://www.google.com/maps/place/Gretta+Hughes+Real+Estate/"
+                        href="https://www.google.com/maps/place/Gretta+Hughes+Real+Estate/@43.3952957,-80.3245627,17z/data=!3m2!4b1!5s0x882b89cb57a6e931:0x10275dab25af59df!4m6!3m5!1s0x882b89ef0d2e7ca5:0xa1511652a58fc5a5!8m2!3d43.3952957!4d-80.3219878!16s%2Fg%2F11m_zpplf0?entry=ttu&g_ep=EgoyMDI2MDMyMy4xIKXMDSoASAFQAw%3D%3D"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-2 text-white/50 hover:text-brand-gold text-sm tracking-[0.15em] uppercase transition-colors duration-300 group"
