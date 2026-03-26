@@ -87,8 +87,8 @@ export function HeroSection() {
                     {/* Thin decorative line - tight to nav */}
                     <div className="w-full h-[1px] bg-brand-gold/30 mb-5 mt-3" />
 
-                    {/* Cities */}
-                    <p className="text-brand-gold tracking-[0.2em] text-[9px] sm:text-[10px] font-medium uppercase mb-4">
+                    {/* Cities - single line */}
+                    <p className="text-brand-gold tracking-[0.15em] text-[8px] sm:text-[10px] font-medium uppercase mb-4 whitespace-nowrap">
                         Cambridge &middot; Kitchener &middot; Waterloo &middot; Guelph &middot; Brantford
                     </p>
 
@@ -99,7 +99,7 @@ export function HeroSection() {
                     </h1>
 
                     {/* Bio text + Image side by side */}
-                    <div className="grid grid-cols-[1fr_42%] gap-4 items-start mb-8">
+                    <div className="grid grid-cols-[1fr_48%] gap-3 items-start mb-8">
                         <div className="text-brand-text-muted text-sm leading-relaxed font-light text-pretty">
                             <p>
                                 I&apos;m Gretta Hughes, a Cambridge-based REALTOR&reg; with a genuine
@@ -115,11 +115,9 @@ export function HeroSection() {
                                 alt="Gretta Hughes - Cambridge & Waterloo Region REALTOR"
                                 fill
                                 priority
-                                sizes="42vw"
+                                sizes="48vw"
                                 className="object-cover object-top"
                             />
-                            {/* Fade at bottom */}
-                            <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-brand-bg to-transparent pointer-events-none" />
                         </div>
                     </div>
 
