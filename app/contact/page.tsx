@@ -6,7 +6,7 @@ import { Facebook, Instagram, Linkedin, MapPin, Phone } from 'lucide-react'
 export const metadata: Metadata = {
     title: 'Contact Gretta Hughes | RE/MAX Twin City Realty',
     description:
-        'Get in touch with Gretta Hughes to buy or sell a home in Cambridge, Kitchener, Waterloo, or Guelph. No pressure, no obligation.',
+        'Get in touch with Gretta Hughes to buy or sell a home in Waterloo Region, Brant County, and beyond. No pressure, no obligation.',
 }
 
 export default async function ContactPage({ searchParams }: { searchParams: Promise<{ type?: string }> }) {

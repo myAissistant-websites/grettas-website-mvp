@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { NeighbourhoodGuide } from '@/app/_components/NeighbourhoodGuide'
 
 export const metadata: Metadata = {
-    title: 'Neighbourhoods Guide | Cambridge, Kitchener, Waterloo & Brantford',
+    title: 'Neighbourhoods Guide | Waterloo Region, Brant County & Beyond',
     description:
         'Explore the different communities across the Waterloo Region. From family-friendly Cambridge neighbourhoods to walkable Uptown Waterloo.',
 }

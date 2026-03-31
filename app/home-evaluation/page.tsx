@@ -7,7 +7,7 @@ import { ContactForm } from '@/components/ContactForm'
 export const metadata: Metadata = {
     title: 'Free Home Evaluation | Gretta Hughes - RE/MAX Twin City',
     description:
-        'Find out what your home is worth. Get a free, no-obligation home evaluation from Gretta Hughes, your local Cambridge and Waterloo Region real estate expert.',
+        'Find out what your home is worth. Get a free, no-obligation home evaluation from Gretta Hughes, your local Waterloo Region and Brant County real estate expert.',
 }
 
 const testimonials = [

@@ -8,9 +8,9 @@ import { MapViewLoader } from './_components/MapViewLoader'
 import { ListingsTermsGate } from './_components/ListingsTermsGate'
 
 export const metadata: Metadata = {
-    title: 'Search Listings | Cambridge, Kitchener, Waterloo & Guelph',
+    title: 'Search Listings | Waterloo Region, Brant County & Beyond',
     description:
-        'Browse homes for sale in Cambridge, Kitchener, Waterloo, Guelph, Brantford and surrounding areas. Filter by price, bedrooms, and property type.',
+        'Browse homes for sale across Waterloo Region, Brant County, and beyond. Filter by price, bedrooms, and property type.',
 }
 
 const PAGE_SIZE = 24
@@ -102,7 +102,7 @@ export default async function ListingsPage({
                         <div className="p-6 pb-4">
                             <h2 className="text-xl font-semibold text-gray-900">Service Area</h2>
                             <p className="text-sm text-gray-500 mt-1">
-                                Cambridge · Kitchener · Waterloo · Guelph · Brantford
+                                Waterloo Region · Brant County · and Beyond
                             </p>
                         </div>
                         <iframe

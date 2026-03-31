@@ -24,9 +24,9 @@ export const metadata: Metadata = {
         template: '%s | Gretta Hughes Real Estate',
     },
     description:
-        'Gretta Hughes is a REALTOR® with RE/MAX Twin City Realty in Cambridge, Ontario. Helping buyers and sellers in Cambridge, Kitchener, Waterloo, Guelph, and Brantford. Search listings, get a free home evaluation, or connect today.',
+        'Gretta Hughes is a REALTOR® with RE/MAX Twin City Realty in Cambridge, Ontario. Helping buyers and sellers across Waterloo Region, Brant County, and beyond. Search listings, get a free home evaluation, or connect today.',
     keywords:
-        'Cambridge real estate agent, Kitchener REALTOR, Waterloo homes for sale, Guelph real estate, Brantford Ontario homes, RE/MAX Twin City, Gretta Hughes, Kitchener homes for sale, Waterloo Region real estate',
+        'Waterloo Region real estate agent, Brant County REALTOR, Cambridge homes for sale, Kitchener real estate, Waterloo homes for sale, RE/MAX Twin City, Gretta Hughes, Waterloo Region real estate',
     openGraph: {
         type: 'website',
         siteName: 'Gretta Hughes | RE/MAX Twin City Realty',

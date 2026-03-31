@@ -98,7 +98,7 @@ export function Navbar() {
     ]
 
     const listingsItems = [
-        { name: "Gretta's Listings", href: '/listings/my-listings' },
+        { name: 'Listings', href: '/listings/my-listings' },
         { name: 'Home Search', href: '/listings' },
     ]
 
@@ -117,11 +117,11 @@ export function Navbar() {
                     {/* Logo */}
                     <Link href="/" className="z-50 relative group flex items-center gap-3">
                         <Image
-                            src="/images/gretta-logo-icon.png"
+                            src="/images/Logo_Good-01.png"
                             alt="Gretta Hughes"
-                            width={44}
-                            height={44}
-                            className="h-9 w-9 md:h-10 md:w-10 rounded-full object-contain"
+                            width={56}
+                            height={32}
+                            className="h-9 w-auto md:h-10 object-contain"
                             priority
                         />
                         <div className="flex flex-col">
@@ -241,7 +241,7 @@ export function Navbar() {
                                         className="text-brand-text hover:text-brand-accent-light transition-colors"
                                         onClick={() => setMobileMenuOpen(false)}
                                     >
-                                        Gretta{"'"}s Listings
+                                        Listings
                                     </Link>
                                     <Link
                                         href="/listings"

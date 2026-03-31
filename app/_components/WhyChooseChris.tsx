@@ -20,7 +20,7 @@ export function WhyChooseChris() {
             icon: TrendingUp,
             title: 'Results Across the Region',
             description:
-                'From Cambridge to Kitchener, Waterloo, Guelph, and Brantford — I help clients find the right home at the right price with strategic marketing and strong negotiation.',
+                'Across Waterloo Region, Brant County, and beyond — I help clients find the right home at the right price with strategic marketing and strong negotiation.',
         },
         {
             icon: ShieldCheck,

@@ -22,7 +22,7 @@ export async function FeaturedListings() {
                                 Homes Available in the Area
                             </h2>
                             <p className="text-brand-text-muted text-base leading-relaxed font-light">
-                                Browse current listings across Kitchener, Waterloo, Cambridge, Breslau, & GTA. New
+                                Browse current listings across Waterloo Region, Brant County, and beyond. New
                                 properties added daily.
                             </p>
                         </div>

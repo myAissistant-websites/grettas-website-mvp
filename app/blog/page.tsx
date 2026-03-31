@@ -5,7 +5,7 @@ import { BlogPageClient } from './BlogPageClient'
 export const metadata: Metadata = {
     title: 'Blog | Gretta Hughes Real Estate',
     description:
-        'Real estate insights and market updates for Cambridge, Kitchener, Waterloo, and Guelph from Gretta Hughes, Sales Representative with RE/MAX Twin City.',
+        'Real estate insights and market updates for Waterloo Region and Brant County from Gretta Hughes, Sales Representative with RE/MAX Twin City.',
     alternates: { canonical: '/blog' },
 }
 

@@ -17,7 +17,7 @@ export function HeroSection() {
                             <div className="w-12 h-[1px] bg-brand-gold mb-8 animate-draw-line" />
 
                             <p className="text-brand-gold tracking-[0.2em] text-[11px] font-medium uppercase mb-6 whitespace-nowrap">
-                                Cambridge &middot; Kitchener &middot; Waterloo &middot; Guelph &middot; Brantford
+                                Waterloo Region &middot; Brant County &middot; and Beyond
                             </p>
 
                             <h1 className="font-display text-6xl 2xl:text-7xl leading-[1.02] text-brand-text mb-6 text-balance">
@@ -89,7 +89,7 @@ export function HeroSection() {
 
                     {/* Cities - single line */}
                     <p className="text-brand-gold tracking-[0.15em] text-[8px] sm:text-[10px] font-medium uppercase mb-4 whitespace-nowrap">
-                        Cambridge &middot; Kitchener &middot; Waterloo &middot; Guelph &middot; Brantford
+                        Waterloo Region &middot; Brant County &middot; and Beyond
                     </p>
 
                     {/* Heading - full width, sized to fit 2 lines */}

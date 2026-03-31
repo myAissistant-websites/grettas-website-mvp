@@ -85,7 +85,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                         Sales Representative &middot; RE/MAX Twin City Realty
                     </p>
                     <p className="text-sm text-brand-text-muted font-light leading-relaxed max-w-md">
-                        Helping buyers and sellers in Cambridge, Kitchener, Waterloo, and Guelph make confident real
+                        Helping buyers and sellers across Waterloo Region, Brant County, and beyond make confident real
                         estate decisions.
                     </p>
                 </div>

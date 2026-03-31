@@ -6,7 +6,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-    title: "Gretta's Listings | Gretta Hughes REALTOR®",
+    title: "Listings | Gretta Hughes REALTOR®",
     description:
         'View properties currently listed by Gretta Hughes, REALTOR® with RE/MAX Twin City Realty in Cambridge.',
 }
@@ -23,7 +23,7 @@ export default async function MyListingsPage() {
                         <Image src="/images/gretta-professional.jpg" alt="Gretta Hughes" fill className="object-cover object-top" />
                     </div>
                     <div className="text-center md:text-left">
-                        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Gretta Hughes&apos;s Listings</h1>
+                        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Listings</h1>
                         <p className="text-gray-500 mt-1">REALTOR® · RE/MAX Twin City Realty Inc., Brokerage</p>
                         <p className="text-sm text-gray-400 mt-1">
                             {listings.length} active listing{listings.length !== 1 ? 's' : ''}

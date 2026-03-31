@@ -18,7 +18,7 @@ export function Footer() {
                             Sales Representative
                         </p>
                         <p className="text-white/50 text-sm font-light leading-relaxed">
-                            Serving Cambridge, Kitchener, Waterloo, Guelph & Brantford
+                            Serving Waterloo Region, Brant County and beyond
                         </p>
                         <div className="mt-6 flex gap-3">
                             <a
