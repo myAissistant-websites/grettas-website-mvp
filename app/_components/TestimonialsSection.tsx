@@ -4,13 +4,13 @@ export function TestimonialsSection() {
     const testimonials = [
         {
             id: 1,
-            quote: "Gretta is truly incredible — in every sense of the word! She's trustworthy, knowledgeable, professional, and strategic. She far exceeded our expectations with the sale of our home and our purchase, negotiating excellent deals on both ends.",
+            quote: "Gretta is truly incredible, in every sense of the word! She's trustworthy, knowledgeable, professional, and strategic. She far exceeded our expectations with the sale of our home and our purchase, negotiating excellent deals on both ends.",
             author: 'Krista Lancaster',
             location: 'Google Review',
         },
         {
             id: 2,
-            quote: "As a single mom with two kids, buying a home felt overwhelming and honestly pretty intimidating — until I worked with Gretta Hughes. From day one, Gretta was patient, kind, and incredibly supportive. She truly understood my situation and made everything feel possible.",
+            quote: "As a single mom with two kids, buying a home felt overwhelming and honestly pretty intimidating, until I worked with Gretta Hughes. From day one, Gretta was patient, kind, and incredibly supportive. She truly understood my situation and made everything feel possible.",
             author: 'Amanda Knight',
             location: 'Google Review',
         },

@@ -15,7 +15,7 @@ export function Footer() {
                     <div className="md:col-span-1">
                         <h2 className="font-display text-3xl mb-1 text-white">Gretta Hughes</h2>
                         <p className="text-white/40 text-[10px] tracking-[0.3em] uppercase mb-6">
-                            Sales Representative
+                            REALTOR&reg;
                         </p>
                         <p className="text-white/50 text-sm font-light leading-relaxed">
                             Serving Waterloo Region, Brant County and beyond
@@ -130,11 +130,11 @@ export function Footer() {
                     <div className="flex flex-col items-start md:items-end justify-between">
                         <div className="flex items-center gap-4 mb-6">
                             <Image
-                                src="/images/Balloon_Mark_RGB.png"
-                                alt="RE/MAX"
-                                width={36}
-                                height={36}
-                                className="opacity-70"
+                                src="/images/REMAX Twin City Logo RGB Vertical-CREAM.png"
+                                alt="RE/MAX Twin City Realty"
+                                width={80}
+                                height={80}
+                                className="opacity-80"
                             />
                             <Image
                                 src="/images/100_club_icon.png"

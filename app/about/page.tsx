@@ -6,7 +6,7 @@ import { TestimonialsSection } from '@/app/_components/TestimonialsSection'
 export const metadata: Metadata = {
     title: 'About Gretta Hughes | REALTOR® Cambridge & Waterloo Region',
     description:
-        'Learn about Gretta Hughes — a passionate REALTOR® with RE/MAX Twin City Realty in Cambridge, Ontario, serving buyers and sellers across the Waterloo Region.',
+        'Learn about Gretta Hughes, a passionate REALTOR® with RE/MAX Twin City Realty in Cambridge, Ontario, serving buyers and sellers across the Waterloo Region.',
 }
 
 export default function AboutPage() {
@@ -40,7 +40,7 @@ export default function AboutPage() {
                             I&apos;m a Cambridge-based Realtor with a genuine appreciation for the
                             community I call home. From our local boutiques and restaurants to the
                             scenic trails, river views, and charming downtown cores, Cambridge offers
-                            a lifestyle that is both vibrant and welcoming — and I take pride in
+                            a lifestyle that is both vibrant and welcoming, and I take pride in
                             helping my clients find their place within it.
                         </p>
                     </div>
@@ -104,7 +104,7 @@ export default function AboutPage() {
                             {
                                 number: '01',
                                 title: "If You're Buying",
-                                text: 'You can expect honest guidance from day one. If a property is overpriced, I will tell you. I review accurate comparables, break down what is happening in that specific neighbourhood, and help you structure a strong, strategic offer that makes sense for you. My goal is for you to feel confident in your decision — not stressed or second guessing it later.',
+                                text: 'You can expect honest guidance from day one. If a property is overpriced, I will tell you. I review accurate comparables, break down what is happening in that specific neighbourhood, and help you structure a strong, strategic offer that makes sense for you. My goal is for you to feel confident in your decision, not stressed or second guessing it later.',
                             },
                             {
                                 number: '02',
@@ -114,7 +114,7 @@ export default function AboutPage() {
                             {
                                 number: '03',
                                 title: 'Either Way',
-                                text: 'You work directly with me. You have my personal number, and you can call or text anytime. I respond promptly and keep communication clear throughout the process. I genuinely care about my clients and their families — this is not just business to me, it is personal.',
+                                text: 'You work directly with me. You have my personal number, and you can call or text anytime. I respond promptly and keep communication clear throughout the process. I genuinely care about my clients and their families. This is not just business to me, it is personal.',
                             },
                         ].map((item) => (
                             <div key={item.number} className="flex flex-col md:flex-row gap-8 items-start group">
@@ -148,7 +148,7 @@ export default function AboutPage() {
                                 {[
                                     {
                                         title: 'Cambridge Roots',
-                                        desc: 'Living in Cambridge since childhood — this community is home',
+                                        desc: 'Living in Cambridge since childhood. This community is home',
                                     },
                                     {
                                         title: 'Early Childhood Education Background',
@@ -183,8 +183,8 @@ export default function AboutPage() {
                             </p>
                             <ul className="space-y-6 text-brand-text-muted font-light">
                                 {[
-                                    'Licensed REALTOR® — Province of Ontario',
-                                    "RE/MAX 100% Club Award — '21, '22, '23, '24",
+                                    'Licensed REALTOR®, Province of Ontario',
+                                    "RE/MAX 100% Club Award '21, '22, '23, '24",
                                     'Member: Canadian Real Estate Association (CREA)',
                                     'Member: Waterloo Region Association of REALTORS® (WRAR)',
                                     'Brokerage: RE/MAX Twin City Realty Inc.',

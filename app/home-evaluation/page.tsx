@@ -154,7 +154,7 @@ export default function HomeEvaluationPage() {
                                     src="/images/gretta-professional.jpg"
                                     alt="Gretta Hughes"
                                     fill
-                                    className="object-cover object-top"
+                                    className="object-cover object-center"
                                     sizes="500px"
                                 />
                             </div>

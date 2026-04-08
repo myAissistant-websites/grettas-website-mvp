@@ -98,7 +98,7 @@ export function Navbar() {
     ]
 
     const listingsItems = [
-        { name: 'Listings', href: '/listings/my-listings' },
+        { name: 'Current Listings', href: '/listings/my-listings' },
         { name: 'Home Search', href: '/listings' },
     ]
 
@@ -129,7 +129,7 @@ export function Navbar() {
                                 Gretta Hughes
                             </span>
                             <span className="text-[9px] uppercase tracking-[0.2em] text-brand-text-muted leading-tight">
-                                Sales Representative
+                                REALTOR&reg;
                             </span>
                         </div>
                     </Link>
@@ -241,7 +241,7 @@ export function Navbar() {
                                         className="text-brand-text hover:text-brand-accent-light transition-colors"
                                         onClick={() => setMobileMenuOpen(false)}
                                     >
-                                        Listings
+                                        Current Listings
                                     </Link>
                                     <Link
                                         href="/listings"

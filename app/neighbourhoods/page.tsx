@@ -82,7 +82,7 @@ export default function NeighbourhoodsPage() {
                 <div className="bg-brand-bg-dark text-white p-12 text-center mt-20 rounded-sm">
                     <h3 className="font-display text-3xl mb-4 italic text-brand-gold">Not sure where to start?</h3>
                     <p className="text-white/80 font-light mb-8 max-w-lg mx-auto">
-                        Tell me what&apos;s important to you — schools, walkability, lot size, commute — and I can tell
+                        Tell me what&apos;s important to you (schools, walkability, lot size, commute) and I can tell
                         you exactly which streets to watch.
                     </p>
                     <Link

@@ -50,16 +50,15 @@ export function StatsSection() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <AnimatedSection>
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-0 divide-x divide-brand-border/50">
-                        <Counter end={15} suffix="+" label="Years in Cambridge" />
-                        <Counter end={5} label="Cities Served" />
+                        <Counter end={30} label="Years in Cambridge" />
+                        <Counter end={10} suffix="+" label="Cities Served" />
                         <Counter end={100} suffix="%" label="Client Focused" />
                         <Counter end={24} suffix="hr" label="Response Time" />
                     </div>
 
                     <div className="text-center mt-12 pt-10 border-t border-brand-border/50">
                         <p className="italic text-brand-text-muted text-sm md:text-base leading-relaxed font-display text-lg">
-                            &ldquo;Every client deserves the same care my family received when we first arrived in
-                            Canada — that&apos;s the standard I hold myself to.&rdquo;
+                            &ldquo;I take pride in delivering a level of service that makes my clients feel supported, confident, and truly taken care of every step of the way.&rdquo;
                         </p>
                     </div>
                 </AnimatedSection>

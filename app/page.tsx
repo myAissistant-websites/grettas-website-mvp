@@ -96,9 +96,6 @@ export default function Home() {
                                 </div>
 
                                 <div className="mt-10 pt-8 border-t border-brand-border/50">
-                                    <p className="text-[10px] font-medium text-brand-text-muted mb-4 uppercase tracking-[0.2em]">
-                                        Follow for Market Updates
-                                    </p>
                                     <div className="flex gap-3">
                                         <a
                                             href="https://www.instagram.com/gretta.hughes/"

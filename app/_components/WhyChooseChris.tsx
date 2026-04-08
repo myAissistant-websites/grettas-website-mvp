@@ -20,7 +20,7 @@ export function WhyChooseChris() {
             icon: TrendingUp,
             title: 'Results Across the Region',
             description:
-                'Across Waterloo Region, Brant County, and beyond — I help clients find the right home at the right price with strategic marketing and strong negotiation.',
+                'Across Waterloo Region, Brant County, and beyond. I help clients find the right home at the right price with strategic marketing and strong negotiation.',
         },
         {
             icon: ShieldCheck,
@@ -38,7 +38,7 @@ export function WhyChooseChris() {
             icon: Home,
             title: 'Free Home Evaluation',
             description:
-                "Thinking about selling? I'll give you an honest market evaluation — no obligation, no pitch. And if you're buying, the search starts right here.",
+                "Thinking about selling? I'll give you an honest market evaluation. No obligation, no pitch. And if you're buying, the search starts right here.",
         },
     ]
 

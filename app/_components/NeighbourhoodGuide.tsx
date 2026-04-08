@@ -15,7 +15,7 @@ export function NeighbourhoodGuide({ showHeader = true }: { showHeader?: boolean
         {
             name: 'Preston',
             city: 'Cambridge',
-            desc: "Riverside living, established streets, and a tight-knit community feel. One of Cambridge's most desirable pockets — listings move fast.",
+            desc: "Riverside living, established streets, and a tight-knit community feel. One of Cambridge's most desirable pockets. Listings move fast.",
             tags: ['Riverside', 'Established', 'Walkable'],
             link: '/listings',
         },
